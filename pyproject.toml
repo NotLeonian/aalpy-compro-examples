@@ -4,6 +4,9 @@ version = "1.0.0"
 description = "Examples of solving competitive programming problems with automata learning using AALpy"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "aalpy>=1.5.3",
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "aalpy-compro",
 ]

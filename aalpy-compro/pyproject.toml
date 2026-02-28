@@ -1,0 +1,9 @@
+[project]
+name = "aalpy-compro"
+version = "1.0.0"
+description = "Libraries to solve competitive programming problems with automata learning using AALpy"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aalpy>=1.5.3",
+]
