@@ -10,3 +10,9 @@ dependencies = []
 members = [
     "aalpy-compro",
 ]
+
+[[tool.mypy.overrides]]
+module = [
+    "aalpy.*",
+]
+ignore_missing_imports = true
