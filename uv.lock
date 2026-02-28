@@ -2,6 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.13"
 
+[manifest]
+members = [
+    "aalpy-compro",
+    "aalpy-compro-examples",
+]
+
 [[package]]
 name = "aalpy"
 version = "1.5.3"
@@ -14,15 +20,20 @@ wheels = [
 ]
 
 [[package]]
-name = "aalpy-compro-examples"
+name = "aalpy-compro"
 version = "1.0.0"
-source = { virtual = "." }
+source = { virtual = "aalpy-compro" }
 dependencies = [
     { name = "aalpy" },
 ]
 
 [package.metadata]
 requires-dist = [{ name = "aalpy", specifier = ">=1.5.3" }]
+
+[[package]]
+name = "aalpy-compro-examples"
+version = "1.0.0"
+source = { virtual = "." }
 
 [[package]]
 name = "pydot"
