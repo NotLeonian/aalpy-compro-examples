@@ -51,7 +51,7 @@ def main() -> None:
 
     args = ap.parse_args()
 
-    property = load_property(args.property)
+    property = load_property(args.path)
 
     if args.oracle == "wp":
         if args.max_states is None:
