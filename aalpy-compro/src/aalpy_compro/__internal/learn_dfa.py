@@ -7,6 +7,7 @@ from aalpy.learning_algs import run_KV
 
 from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
 from .sul import PrefixAcceptingSUL
+from ..errors import ConstraintViolationError
 
 type KVCexProcessing = Literal[
     "rs", "linear_fwd", "linear_bwd", "exponential_fwd", "exponential_bwd"
@@ -46,8 +47,10 @@ def learn_dfa_KV[T](
     assert isinstance(dfa, Dfa)
 
     if isinstance(oracle_spec, WpSpec) and dfa.size > oracle_spec.max_states:
-        raise RuntimeError(
-            f"Bound violated: learned DFA has {dfa.size} states > max_states={oracle_spec.max_states}."
+        raise ConstraintViolationError(
+            constraint="max_states",
+            required=f"<= {oracle_spec.max_states}",
+            actual=dfa.size,
         )
 
     return dfa
