@@ -14,5 +14,6 @@ members = [
 [[tool.mypy.overrides]]
 module = [
     "aalpy.*",
+    "pydot.*",
 ]
 ignore_missing_imports = true
