@@ -176,9 +176,9 @@ def dot_to_cpp(
         trans_table.append([sink] * k)
         n += 1
 
-    accepting = [True] * n
+    accepting = ["true"] * n
     for i, s in enumerate(parsed.states):
-        accepting[i] = parsed.accepting.get(s, False)
+        accepting[i] = "true" if parsed.accepting.get(s, False) else "false"
 
     res: list[str] = []
     res.append(f"// States: {n}, Alphabet: {k}")
