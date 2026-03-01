@@ -3,13 +3,18 @@ name = "aalpy-compro-examples"
 version = "1.0.0"
 description = "Examples of solving competitive programming problems with automata learning using AALpy"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.11"
+dependencies = [
+    "aalpy-compro",
+]
 
 [tool.uv.workspace]
 members = [
     "aalpy-compro",
 ]
+
+[tool.uv.sources]
+aalpy-compro = { workspace = true }
 
 [[tool.mypy.overrides]]
 module = [
