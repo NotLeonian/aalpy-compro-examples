@@ -3,7 +3,7 @@ from collections.abc import Callable
 from aalpy.base import SUL
 
 
-class __PrefixAcceptingSUL[T](SUL):
+class PrefixAcceptingSUL[T](SUL):
     """
     愚直や CYK 法などで実装された
     accepts(word: tuple[T, ...]) -> bool
