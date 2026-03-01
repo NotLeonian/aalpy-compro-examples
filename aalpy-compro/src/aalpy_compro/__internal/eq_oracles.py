@@ -1,11 +1,13 @@
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, TypeAlias, TypeVar
 
 from aalpy.base import SUL
 from aalpy.oracles import WpMethodEqOracle, RandomWpMethodEqOracle, StatePrefixEqOracle
 
-type EqOracle = WpMethodEqOracle | RandomWpMethodEqOracle | StatePrefixEqOracle
+EqOracle: TypeAlias = WpMethodEqOracle | RandomWpMethodEqOracle | StatePrefixEqOracle
+
+T = TypeVar("T")
 
 
 @dataclass(frozen=True)
@@ -31,10 +33,10 @@ class StatePrefixSpec:
     depth_first: bool
 
 
-type EqOracleSpec = WpSpec | RandomWpSpec | StatePrefixSpec
+EqOracleSpec: TypeAlias = WpSpec | RandomWpSpec | StatePrefixSpec
 
 
-def build_eq_oracle[T](
+def build_eq_oracle(
     alphabet: Sequence[T],
     sul: SUL,
     spec: EqOracleSpec,

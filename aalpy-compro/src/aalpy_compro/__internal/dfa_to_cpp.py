@@ -1,6 +1,7 @@
 from collections import defaultdict, deque
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import TypeVar
 import re
 
 from aalpy.automata import Dfa
@@ -8,8 +9,10 @@ from aalpy.utils.FileHandler import save_automaton_to_file
 
 import pydot
 
+T = TypeVar("T")
 
-def dfa_to_dot_string[T](dfa: Dfa[T]) -> str:
+
+def dfa_to_dot_string(dfa: Dfa[T]) -> str:
     # AALpy では DFA の DOT を文字列として保存することが可能
     res = save_automaton_to_file(dfa, file_type="string")
     assert res is not None
@@ -126,7 +129,7 @@ def parse_aalpy_dfa_dot(dot_text: str, *, drop_unreachable: bool = True) -> Pars
     return ParsedDfa(states, initial_state, accepting, trans)
 
 
-def dot_to_cpp[T](
+def dot_to_cpp(
     *,
     dot_text: str,
     alphabet: Sequence[T],

@@ -1,6 +1,6 @@
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypeAlias, TypeVar
 
 from aalpy.automata import Dfa
 from aalpy.learning_algs import run_KV
@@ -9,9 +9,11 @@ from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
 from .sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
-type KVCexProcessing = Literal[
+KVCexProcessing: TypeAlias = Literal[
     "rs", "linear_fwd", "linear_bwd", "exponential_fwd", "exponential_bwd"
 ]
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -22,7 +24,7 @@ class LearnConfig:
     print_level: int = 2
 
 
-def learn_dfa_KV[T](
+def learn_dfa_KV(
     *,
     alphabet: Sequence[T],
     accepts: Callable[[tuple[T, ...]], bool],

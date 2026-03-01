@@ -1,9 +1,12 @@
 from collections.abc import Callable
+from typing import Generic, TypeVar
 
 from aalpy.base import SUL
 
+T = TypeVar("T")
 
-class PrefixAcceptingSUL[T](SUL):
+
+class PrefixAcceptingSUL(SUL, Generic[T]):
     """
     愚直や CYK 法などで実装された
     accepts(word: tuple[T, ...]) -> bool

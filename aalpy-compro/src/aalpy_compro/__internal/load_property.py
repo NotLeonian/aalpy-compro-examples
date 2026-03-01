@@ -1,10 +1,13 @@
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from importlib.util import spec_from_file_location, module_from_spec
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
 
 
 @dataclass(frozen=True)
-class LearningProperty[T]:
+class LearningProperty(Generic[T]):
     alphabet: Sequence[T]
     accepts: Callable[[tuple[T, ...]], bool]
     symbol_to_label: Callable[[T], str] = str
