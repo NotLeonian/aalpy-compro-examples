@@ -1,9 +1,40 @@
 import argparse
+from dataclasses import dataclass
 
-from .__internal.eq_oracles import WpSpec, RandomWpSpec, StatePrefixSpec, EqOracleSpec
-from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
+from .__internal.eq_oracles import (
+    EqOracleLiteral,
+    WpSpec,
+    RandomWpSpec,
+    StatePrefixSpec,
+    EqOracleSpec,
+)
+from .__internal.learn_dfa import KVCexProcessing, LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.load_property import load_property
+
+
+@dataclass(frozen=True)
+class LearnArgs:
+    """
+    コマンドライン引数で与えられるオプションのクラス
+    """
+
+    path: str
+    oracle: EqOracleLiteral
+    output: str
+    namespace: str
+    cex_processing: KVCexProcessing
+    max_rounds: int | None
+    no_cache: bool
+    print_level: int
+    max_states: int | None
+    min_length: int
+    expected_length: int
+    num_tests: int
+    walks_per_state: int
+    walk_len: int
+    max_tests: int | None
+    depth_first: bool
 
 
 def main() -> None:
@@ -42,14 +73,14 @@ def main() -> None:
     parser.add_argument("--num-tests", type=int, default=1000)
 
     # StatePrefix params
-    parser.add_argument("--walks-per-state", type=int)
-    parser.add_argument("--walk-len", type=int)
-    parser.add_argument("--max-tests", type=int)
+    parser.add_argument("--walks-per-state", type=int, default=25)
+    parser.add_argument("--walk-len", type=int, default=12)
+    parser.add_argument("--max-tests", type=int, default=None)
     parser.add_argument("--depth-first", action="store_true")
     parser.add_argument("--no-depth-first", dest="depth_first", action="store_false")
     parser.set_defaults(depth_first=True)
 
-    args = parser.parse_args()
+    args = LearnArgs(**vars(parser.parse_args()))
 
     property = load_property(args.path)
 

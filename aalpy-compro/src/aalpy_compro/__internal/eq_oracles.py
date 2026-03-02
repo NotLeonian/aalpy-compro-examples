@@ -6,6 +6,7 @@ from aalpy.base import SUL
 from aalpy.oracles import WpMethodEqOracle, RandomWpMethodEqOracle, StatePrefixEqOracle
 
 EqOracle: TypeAlias = WpMethodEqOracle | RandomWpMethodEqOracle | StatePrefixEqOracle
+EqOracleLiteral: TypeAlias = Literal["wp", "random_wp", "state_prefix"]
 
 T = TypeVar("T")
 
