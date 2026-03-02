@@ -1,9 +1,40 @@
 import argparse
+from dataclasses import dataclass
 
-from .__internal.eq_oracles import WpSpec, RandomWpSpec, StatePrefixSpec, EqOracleSpec
-from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
+from .__internal.eq_oracles import (
+    EqOracleLiteral,
+    WpSpec,
+    RandomWpSpec,
+    StatePrefixSpec,
+    EqOracleSpec,
+)
+from .__internal.learn_dfa import KVCexProcessing, LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.load_property import load_property
+
+
+@dataclass(frozen=True)
+class LearnArgs:
+    """
+    コマンドライン引数で与えられるオプションのクラス
+    """
+
+    path: str
+    oracle: EqOracleLiteral
+    output: str
+    namespace: str
+    cex_processing: KVCexProcessing
+    max_rounds: int | None
+    no_cache: bool
+    print_level: int
+    max_states: int | None
+    min_length: int
+    expected_length: int
+    num_tests: int
+    walks_per_state: int
+    walk_len: int
+    max_tests: int | None
+    depth_first: bool
 
 
 def main() -> None:
@@ -14,42 +45,42 @@ def main() -> None:
     オプションはコマンドライン引数で与える
     """
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
         "--path",
         required=True,
         help="Path to .py file providing alphabet/accepts",
     )
-    ap.add_argument(
+    parser.add_argument(
         "--oracle", required=True, choices=["wp", "random_wp", "state_prefix"]
     )
-    ap.add_argument("-o", "--output", default="learned.cpp")
-    ap.add_argument("--namespace", default="learned_dfa")
+    parser.add_argument("-o", "--output", default="learned.cpp")
+    parser.add_argument("--namespace", default="learned_dfa")
 
     # KV params
-    ap.add_argument("--cex-processing", default="rs")
-    ap.add_argument("--max-rounds", type=int, default=None)
-    ap.add_argument("--no-cache", action="store_true")
-    ap.add_argument("--print-level", type=int, default=2)
+    parser.add_argument("--cex-processing", default="rs")
+    parser.add_argument("--max-rounds", type=int, default=None)
+    parser.add_argument("--no-cache", action="store_true")
+    parser.add_argument("--print-level", type=int, default=2)
 
     # Wp params
     # max-states には default の値を設定していないことに注意
-    ap.add_argument("--max-states", type=int, default=None)
+    parser.add_argument("--max-states", type=int, default=None)
 
     # RandomWp params
-    ap.add_argument("--min-length", type=int, default=1)
-    ap.add_argument("--expected-length", type=int, default=10)
-    ap.add_argument("--num-tests", type=int, default=1000)
+    parser.add_argument("--min-length", type=int, default=1)
+    parser.add_argument("--expected-length", type=int, default=10)
+    parser.add_argument("--num-tests", type=int, default=1000)
 
     # StatePrefix params
-    ap.add_argument("--walks-per-state", type=int)
-    ap.add_argument("--walk-len", type=int)
-    ap.add_argument("--max-tests", type=int)
-    ap.add_argument("--depth-first", action="store_true")
-    ap.add_argument("--no-depth-first", dest="depth_first", action="store_false")
-    ap.set_defaults(depth_first=True)
+    parser.add_argument("--walks-per-state", type=int, default=25)
+    parser.add_argument("--walk-len", type=int, default=12)
+    parser.add_argument("--max-tests", type=int, default=None)
+    parser.add_argument("--depth-first", action="store_true")
+    parser.add_argument("--no-depth-first", dest="depth_first", action="store_false")
+    parser.set_defaults(depth_first=True)
 
-    args = ap.parse_args()
+    args = LearnArgs(**vars(parser.parse_args()))
 
     property = load_property(args.path)
 
