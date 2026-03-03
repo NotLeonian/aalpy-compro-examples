@@ -21,7 +21,6 @@ class LearnArgs:
 
     path: str
     oracle: EqOracleLiteral
-    output: str
     namespace: str
     cex_processing: KVCexProcessing
     max_rounds: int | None
@@ -54,7 +53,6 @@ def main() -> None:
     parser.add_argument(
         "--oracle", required=True, choices=["wp", "random_wp", "state_prefix"]
     )
-    parser.add_argument("-o", "--output", default="learned.cpp")
     parser.add_argument("--namespace", default="learned_dfa")
 
     # KV params
@@ -123,8 +121,8 @@ def main() -> None:
         namespace=args.namespace,
         add_sink_if_missing=True,
     )
-    with open(args.output, "w", encoding="utf-8") as f:
-        f.write(res)
+
+    print(res)
 
 
 if __name__ == "__main__":
