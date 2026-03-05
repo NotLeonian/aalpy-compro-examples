@@ -13,7 +13,7 @@ from .__internal.learn_dfa import KVCexProcessing, LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.load_property import load_property
 
-RunKind: TypeAlias = Literal["learn", "struct"]
+RunKind: TypeAlias = Literal["learn", "common"]
 
 
 @dataclass(frozen=True)
@@ -53,7 +53,7 @@ def main() -> None:
     parser.add_argument(
         "--kind",
         required=True,
-        choices=["learn", "struct"],
+        choices=["learn", "common"],
         default="learn",
     )
     parser.add_argument(
