@@ -177,39 +177,38 @@ def dot_to_cpp(
         trans_table.append([sink] * sigma)
         n += 1
 
-    accepting = ["true"] * n
+    accepting = [0] * n
     for i, s in enumerate(parsed.states):
-        accepting[i] = "true" if parsed.accepting.get(s, False) else "false"
+        accepting[i] = 1 if parsed.accepting.get(s, False) else 0
 
     res: list[str] = []
+    res.append("#include <array>")
+    res.append("")
+    res.append(f"namespace {namespace}_{key} {{")
     res.append(f"// States: {n}, Alphabet: {sigma}")
     res.append("// Symbol index mapping:")
     for j, label in enumerate(labels):
         res.append(f"//   {j}: {label}")
     res.append("")
-    res.append(f"namespace {namespace} {{")
-    res.append(f"static constexpr int N = {n};")
-    res.append(f"static constexpr int SIGMA = {sigma};")
-    res.append(f"static constexpr int INITIAL_STATE = {initial_state};")
-    res.append(
-        "static constexpr bool ACCEPTING[N] = { "
-        + ", ".join(map(str, accepting))
-        + " };"
-    )
-    res.append("static constexpr int TRANS[N][SIGMA] = {")
-    for i in range(n):
-        res.append("    { " + ", ".join(map(str, trans_table[i])) + " },")
-    res.append("};")
+    res.append(f"inline constexpr int N = {n};")
+    res.append(f"inline constexpr int SIGMA = {sigma};")
+    res.append(f"inline constexpr int INITIAL_STATE = {initial_state};")
     res.append("")
-    res.append("template <class It>")
-    res.append("bool accepts(It begin, It end) {")
-    res.append("    int cur = INITIAL_STATE;")
-    res.append("    for (auto it = begin; it != end; ++it) {")
-    res.append("        const int label = *it;")
-    res.append("        cur = TRANS[cur][label];")
-    res.append("    }")
-    res.append("    return ACCEPTING[cur];")
-    res.append("}")
-    res.append(f"}} // namespace {namespace}")
+    res.append("inline constexpr std::array<unsigned char, N> ACCEPTING = {{")
+    res.append(f"    {', '.join(map(str, accepting))}")
+    res.append("}};")
+    res.append("")
+    res.append("inline constexpr std::array<std::array<int, SIGMA>, N> TRANS = {{")
+    for i in range(n):
+        res.append(f"    {{{{{', '.join(map(str, trans_table[i]))}}}}},")
+    res.append("}};")
+    res.append("")
+    res.append(f"static const int __{namespace}_register_{key} = [] {{")
+    res.append(
+        f'    {namespace}::dfas().register_dfa(INITIAL_STATE, ACCEPTING, TRANS, "{key}");'
+    )
+    res.append("    return 0;")
+    res.append("}();")
+    res.append(f"}} // namespace {namespace}_{key}")
 
     return "\n".join(res)
