@@ -210,5 +210,6 @@ def dot_to_cpp(
     res.append("    return 0;")
     res.append("}();")
     res.append(f"}} // namespace {namespace}_{key}")
+    res.append("")
 
     return "\n".join(res)
