@@ -26,6 +26,7 @@ class LearnArgs:
     path: str | None
     oracle: EqOracleLiteral | None
     namespace: str
+    key: str
     cex_processing: KVCexProcessing
     max_rounds: int | None
     no_cache: bool
@@ -67,6 +68,7 @@ def main() -> None:
         default=None,
     )
     parser.add_argument("--namespace", default="learned_dfa")
+    parser.add_argument("--key", default="")
 
     # KV params
     parser.add_argument("--cex-processing", default="rs")
@@ -138,6 +140,7 @@ def main() -> None:
             alphabet=property.alphabet,
             symbol_to_label=property.symbol_to_label,
             namespace=args.namespace,
+            key=args.key,
             add_sink_if_missing=True,
         )
 

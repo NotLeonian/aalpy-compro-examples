@@ -135,6 +135,7 @@ def dot_to_cpp(
     alphabet: Sequence[T],
     symbol_to_label: Callable[[T], str] = str,
     namespace: str = "learned_dfa",
+    key: str = "",
     add_sink_if_missing: bool = True,
 ) -> str:
     """
