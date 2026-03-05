@@ -11,6 +11,7 @@ from .__internal.eq_oracles import (
 )
 from .__internal.learn_dfa import KVCexProcessing, LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
+from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.load_property import load_property
 
 RunKind: TypeAlias = Literal["learn", "common"]
@@ -146,8 +147,9 @@ def main() -> None:
 
         print(res)
     else:
-        # TODO!
-        pass
+        res = common_dfa_struct(namespace=args.namespace)
+
+        print(res)
 
 
 if __name__ == "__main__":
