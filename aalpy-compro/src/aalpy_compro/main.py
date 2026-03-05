@@ -17,7 +17,7 @@ RunKind: TypeAlias = Literal["learn", "common"]
 
 
 @dataclass(frozen=True)
-class LearnArgs:
+class MainArgs:
     """
     コマンドライン引数で与えられるオプションのクラス
     """
@@ -93,7 +93,7 @@ def main() -> None:
     parser.add_argument("--no-depth-first", dest="depth_first", action="store_false")
     parser.set_defaults(depth_first=True)
 
-    args = LearnArgs(**vars(parser.parse_args()))
+    args = MainArgs(**vars(parser.parse_args()))
 
     if args.kind == "learn":
         if args.path is None:
