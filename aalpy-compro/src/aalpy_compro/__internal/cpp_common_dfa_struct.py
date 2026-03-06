@@ -37,9 +37,15 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     )
     res.append("        : n(N), sigma(SIGMA), initial_state(initial_state),")
     res.append(
-        "          accepting(acc.begin(), acc.end()), trans(tr.begin(), tr.end()),"
+        "          accepting(acc.begin(), acc.end()), trans(N, std::vector<int>(SIGMA)),"
     )
-    res.append("          key(key) {}")
+    res.append("          key(key) {")
+    res.append("        for (int i = 0; i < N; i += 1) {")
+    res.append("            for (int j = 0; j < SIGMA; j += 1) {")
+    res.append("                trans[i][j] = tr[i][j];")
+    res.append("            }")
+    res.append("        }")
+    res.append("    }")
     res.append("};")
     res.append("")
     res.append("struct DFAs {")
