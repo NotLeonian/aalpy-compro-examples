@@ -115,8 +115,8 @@ def parse_aalpy_dfa_dot(dot_text: str, *, drop_unreachable: bool = True) -> Pars
 
         accepting = {s: accepting.get(s, False) for s in reachable}
         trans = {
-            (src, lab): dst
-            for (src, lab), dst in trans.items()
+            (src, label): dst
+            for (src, label), dst in trans.items()
             if src in reachable and dst in reachable
         }
 
