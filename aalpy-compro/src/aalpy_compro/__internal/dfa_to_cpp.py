@@ -151,6 +151,9 @@ def dot_to_cpp(
 
     adj: dict[str, dict[str, str]] = {s: {} for s in parsed.states}
     for (src, label), dst in parsed.trans.items():
+        if label not in labels:
+            raise ValueError("`dot_text` has unknown labels.")
+
         adj[src][label] = dst
 
     idx = {s: i for i, s in enumerate(parsed.states)}
