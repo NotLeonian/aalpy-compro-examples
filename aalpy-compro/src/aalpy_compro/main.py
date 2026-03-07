@@ -1,4 +1,6 @@
+from collections.abc import Callable
 import argparse
+import re
 
 from .__internal.eq_oracles import (
     WpSpec,
@@ -10,6 +12,8 @@ from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.load_property import load_property
+from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
+from .__internal.fullmatch import validate_fullmatch_pattern
 from .__internal.main_args import MainArgs
 
 
@@ -20,6 +24,24 @@ def main() -> None:
 
     オプションはコマンドライン引数で与える
     """
+
+    def parse_fullmatch_pattern(
+        *,
+        pattern: re.Pattern[str],
+        arg_name: str,
+    ) -> Callable[[str], str]:
+        def __validator(value: str) -> str:
+            validate_fullmatch_pattern(
+                pattern=pattern,
+                string=value,
+                exception=argparse.ArgumentTypeError(
+                    f"{arg_name} must match /{pattern.pattern}/."
+                ),
+            )
+
+            return value
+
+        return __validator
 
     parser = argparse.ArgumentParser()
 
@@ -39,8 +61,18 @@ def main() -> None:
         choices=["wp", "random_wp", "state_prefix"],
         default=None,
     )
-    parser.add_argument("--namespace", default="learned_dfa")
-    parser.add_argument("--key", default="result")
+    parser.add_argument(
+        "--namespace",
+        type=parse_fullmatch_pattern(pattern=NAMESPACE_PATTERN, arg_name="namespace"),
+        help=f"--namespace must match /{NAMESPACE_PATTERN.pattern}/.",
+        default="learned_dfa",
+    )
+    parser.add_argument(
+        "--key",
+        type=parse_fullmatch_pattern(pattern=KEY_PATTERN, arg_name="key"),
+        help=f"--key must match /{KEY_PATTERN.pattern}/.",
+        default="result",
+    )
 
     # KV params
     parser.add_argument("--cex-processing", default="rs")
