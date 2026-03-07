@@ -35,7 +35,7 @@ class MainArgs:
     depth_first: bool
 
     def __post_init__(self) -> None:
-        def raise_value_error_if_not_fullmatch(
+        def raise_value_error_if_non_fullmatch(
             *,
             pattern: re.Pattern[str],
             string: str,
@@ -47,9 +47,9 @@ class MainArgs:
                 exception=ValueError(f"{var_name} must match /{pattern.pattern}/."),
             )
 
-        raise_value_error_if_not_fullmatch(
+        raise_value_error_if_non_fullmatch(
             pattern=NAMESPACE_PATTERN, string=self.namespace, var_name="namespace"
         )
-        raise_value_error_if_not_fullmatch(
+        raise_value_error_if_non_fullmatch(
             pattern=KEY_PATTERN, string=self.key, var_name="key"
         )
