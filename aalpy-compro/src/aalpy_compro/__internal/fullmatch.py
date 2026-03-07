@@ -2,6 +2,7 @@ import re
 
 
 def allow_fullmatch(
+    *,
     pattern: re.Pattern[str],
     string: str,
     exception: BaseException,
