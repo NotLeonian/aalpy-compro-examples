@@ -10,7 +10,7 @@ from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.load_property import load_property
-from .main_args import MainArgs
+from .__internal.main_args import MainArgs
 
 
 def main() -> None:

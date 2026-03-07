@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal, TypeAlias
 
-from .__internal.eq_oracles import EqOracleLiteral
-from .__internal.learn_dfa import KVCexProcessing
+from .eq_oracles import EqOracleLiteral
+from .learn_dfa import KVCexProcessing
 
 RunKind: TypeAlias = Literal["learn", "common"]
 
