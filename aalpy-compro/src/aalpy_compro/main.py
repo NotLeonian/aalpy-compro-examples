@@ -70,8 +70,14 @@ def main() -> None:
     parser.add_argument(
         "--key",
         type=parse_fullmatch_pattern(pattern=KEY_PATTERN, arg_name="key"),
-        help=f"--key must match /{KEY_PATTERN.pattern}/.",
-        default="result",
+        help="\n".join(
+            [
+                f"--key must match /{KEY_PATTERN.pattern}/.",
+                'When --kind is "learn", effectively required.',
+                "Each name should be unique.",
+            ]
+        ),
+        default=None,
     )
 
     # KV params
@@ -139,6 +145,7 @@ def main() -> None:
             learn_config=learn_config,
         )
 
+        assert args.key is not None  # MainArgs の __post_init__ で弾かれている
         res = dot_to_cpp(
             dot_text=dfa_to_dot_string(dfa),
             alphabet=property.alphabet,

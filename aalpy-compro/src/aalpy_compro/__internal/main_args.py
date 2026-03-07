@@ -20,7 +20,7 @@ class MainArgs:
     path: str | None
     oracle: EqOracleLiteral | None
     namespace: str  # NAMESPACE_PATTERN に fullmatch するもの
-    key: str  # KEY_PATTERN に fullmatch するもの
+    key: str | None  # KEY_PATTERN に fullmatch するもの（もしくは None）
     cex_processing: KVCexProcessing
     max_rounds: int | None
     no_cache: bool
@@ -50,6 +50,10 @@ class MainArgs:
         raise_value_error_if_non_fullmatch(
             pattern=NAMESPACE_PATTERN, string=self.namespace, var_name="namespace"
         )
-        raise_value_error_if_non_fullmatch(
-            pattern=KEY_PATTERN, string=self.key, var_name="key"
-        )
+        if self.key is None:
+            if self.kind == "learn":
+                raise ValueError('When --kind is "learn", --key is required.')
+        else:
+            raise_value_error_if_non_fullmatch(
+                pattern=KEY_PATTERN, string=self.key, var_name="key"
+            )
