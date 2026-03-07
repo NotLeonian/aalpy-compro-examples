@@ -47,8 +47,8 @@ def main() -> None:
 
     parser.add_argument(
         "--kind",
-        required=True,
         choices=["learn", "common"],
+        help='Select "learn" or "common" (default: "learn").',
         default="learn",
     )
     parser.add_argument(
