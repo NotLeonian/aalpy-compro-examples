@@ -147,10 +147,13 @@ def dot_to_cpp(
     labels = [symbol_to_label(a) for a in alphabet]
     label_to_col = {label: i for i, label in enumerate(labels)}
     if len(label_to_col) != len(labels):
-        raise ValueError("alphabet has duplicate labels after symbol_to_label().")
+        raise ValueError("`alphabet` has duplicate labels after `symbol_to_label`.")
 
     adj: dict[str, dict[str, str]] = {s: {} for s in parsed.states}
     for (src, label), dst in parsed.trans.items():
+        if label not in labels:
+            raise ValueError("`dot_text` has unknown labels.")
+
         adj[src][label] = dst
 
     idx = {s: i for i, s in enumerate(parsed.states)}
@@ -162,6 +165,7 @@ def dot_to_cpp(
     for i, src in enumerate(parsed.states):
         for label, j in label_to_col.items():
             _dst: str | None = adj.get(src, {}).get(label)
+            # dead 状態 (sink) への遷移が省略されている可能性がある
             if _dst is not None:
                 trans_table[i][j] = idx[_dst]
 
