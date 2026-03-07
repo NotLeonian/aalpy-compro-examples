@@ -40,7 +40,7 @@ def main() -> None:
         default=None,
     )
     parser.add_argument("--namespace", default="learned_dfa")
-    parser.add_argument("--key", default="")
+    parser.add_argument("--key", default="result")
 
     # KV params
     parser.add_argument("--cex-processing", default="rs")
