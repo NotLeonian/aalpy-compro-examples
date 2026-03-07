@@ -6,9 +6,10 @@ from .__internal.eq_oracles import (
     WpSpec,
     RandomWpSpec,
     StatePrefixSpec,
+    EqOracleList,
     EqOracleSpec,
 )
-from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
+from .__internal.learn_dfa import KVCexProcessingList, LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.load_property import load_property
@@ -58,7 +59,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--oracle",
-        choices=["wp", "random_wp", "state_prefix"],
+        choices=EqOracleList,
         default=None,
     )
     parser.add_argument(
@@ -81,7 +82,11 @@ def main() -> None:
     )
 
     # KV params
-    parser.add_argument("--cex-processing", default="rs")
+    parser.add_argument(
+        "--cex-processing",
+        choices=KVCexProcessingList,
+        default="rs",
+    )
     parser.add_argument("--max-rounds", type=int, default=None)
     parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--print-level", type=int, default=2)

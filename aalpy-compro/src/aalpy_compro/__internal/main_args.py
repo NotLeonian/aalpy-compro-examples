@@ -3,7 +3,7 @@ from typing import Literal, TypeAlias
 import re
 
 from .eq_oracles import EqOracleLiteral
-from .learn_dfa import KVCexProcessing
+from .learn_dfa import KVCexProcessingLiteral
 from .re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
 from .fullmatch import validate_fullmatch_pattern
 
@@ -21,7 +21,7 @@ class MainArgs:
     oracle: EqOracleLiteral | None
     namespace: str  # NAMESPACE_PATTERN に fullmatch するもの
     key: str | None  # KEY_PATTERN に fullmatch するもの（もしくは None）
-    cex_processing: KVCexProcessing
+    cex_processing: KVCexProcessingLiteral
     max_rounds: int | None
     no_cache: bool
     print_level: int
