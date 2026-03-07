@@ -5,7 +5,7 @@ import re
 from .eq_oracles import EqOracleLiteral
 from .learn_dfa import KVCexProcessing
 from .re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
-from .fullmatch import allow_fullmatch
+from .fullmatch import validate_fullmatch_pattern
 
 RunKind: TypeAlias = Literal["learn", "common"]
 
@@ -41,7 +41,7 @@ class MainArgs:
             string: str,
             var_name: str,
         ) -> None:
-            allow_fullmatch(
+            validate_fullmatch_pattern(
                 pattern=pattern,
                 string=string,
                 exception=ValueError(f"{var_name} must match /{pattern.pattern}/."),

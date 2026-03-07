@@ -1,7 +1,7 @@
 import re
 
 
-def allow_fullmatch(
+def validate_fullmatch_pattern(
     *,
     pattern: re.Pattern[str],
     string: str,
