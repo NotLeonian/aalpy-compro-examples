@@ -162,6 +162,7 @@ def dot_to_cpp(
     for i, src in enumerate(parsed.states):
         for label, j in label_to_col.items():
             _dst: str | None = adj.get(src, {}).get(label)
+            # dead 状態 (sink) への遷移が省略されている可能性がある
             if _dst is not None:
                 trans_table[i][j] = idx[_dst]
 
