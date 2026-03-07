@@ -9,6 +9,13 @@ from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
 from .sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
+KVCexProcessingList: list[str] = [
+    "rs",
+    "linear_fwd",
+    "linear_bwd",
+    "exponential_fwd",
+    "exponential_bwd",
+]
 KVCexProcessingLiteral: TypeAlias = Literal[
     "rs", "linear_fwd", "linear_bwd", "exponential_fwd", "exponential_bwd"
 ]
