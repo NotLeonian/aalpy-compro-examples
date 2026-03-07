@@ -9,7 +9,7 @@ from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
 from .sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
-KVCexProcessing: TypeAlias = Literal[
+KVCexProcessingLiteral: TypeAlias = Literal[
     "rs", "linear_fwd", "linear_bwd", "exponential_fwd", "exponential_bwd"
 ]
 
@@ -18,7 +18,7 @@ T = TypeVar("T")
 
 @dataclass
 class LearnConfig:
-    cex_processing: KVCexProcessing = "rs"
+    cex_processing: KVCexProcessingLiteral = "rs"
     max_learning_rounds: int | None = None
     cache_and_non_det_check: bool = True
     print_level: int = 2
