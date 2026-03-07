@@ -1,45 +1,16 @@
 import argparse
-from dataclasses import dataclass
-from typing import Literal, TypeAlias
 
 from .__internal.eq_oracles import (
-    EqOracleLiteral,
     WpSpec,
     RandomWpSpec,
     StatePrefixSpec,
     EqOracleSpec,
 )
-from .__internal.learn_dfa import KVCexProcessing, LearnConfig, learn_dfa_KV
+from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.load_property import load_property
-
-RunKind: TypeAlias = Literal["learn", "common"]
-
-
-@dataclass(frozen=True)
-class MainArgs:
-    """
-    コマンドライン引数で与えられるオプションのクラス
-    """
-
-    kind: RunKind
-    path: str | None
-    oracle: EqOracleLiteral | None
-    namespace: str
-    key: str
-    cex_processing: KVCexProcessing
-    max_rounds: int | None
-    no_cache: bool
-    print_level: int
-    max_states: int | None
-    min_length: int
-    expected_length: int
-    num_tests: int
-    walks_per_state: int
-    walk_len: int
-    max_tests: int | None
-    depth_first: bool
+from .main_args import MainArgs
 
 
 def main() -> None:
