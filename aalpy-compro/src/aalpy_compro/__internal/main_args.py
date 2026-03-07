@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from typing import Literal, TypeAlias
+import re
 
 from .eq_oracles import EqOracleLiteral
 from .learn_dfa import KVCexProcessing
+from .re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
+from .fullmatch import allow_fullmatch
 
 RunKind: TypeAlias = Literal["learn", "common"]
 
@@ -16,8 +19,8 @@ class MainArgs:
     kind: RunKind
     path: str | None
     oracle: EqOracleLiteral | None
-    namespace: str
-    key: str
+    namespace: str  # NAMESPACE_PATTERN に fullmatch するもの
+    key: str  # KEY_PATTERN に fullmatch するもの
     cex_processing: KVCexProcessing
     max_rounds: int | None
     no_cache: bool
@@ -30,3 +33,23 @@ class MainArgs:
     walk_len: int
     max_tests: int | None
     depth_first: bool
+
+    def __post_init__(self) -> None:
+        def raise_value_error_if_not_fullmatch(
+            *,
+            pattern: re.Pattern[str],
+            string: str,
+            var_name: str,
+        ) -> None:
+            allow_fullmatch(
+                pattern=pattern,
+                string=string,
+                exception=ValueError(f"{var_name} must match /{pattern.pattern}/."),
+            )
+
+        raise_value_error_if_not_fullmatch(
+            pattern=NAMESPACE_PATTERN, string=self.namespace, var_name="namespace"
+        )
+        raise_value_error_if_not_fullmatch(
+            pattern=KEY_PATTERN, string=self.key, var_name="key"
+        )
