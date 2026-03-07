@@ -25,15 +25,15 @@ def load_property(path: str) -> LearningProperty[object]:
 
     spec = spec_from_file_location("learning_property", path)
     if spec is None or spec.loader is None:
-        raise ValueError(f"Cannot load property from {path}")
+        raise ValueError(f"Cannot load property from {path}.")
 
     mod = module_from_spec(spec)
     spec.loader.exec_module(mod)
 
     if not hasattr(mod, "alphabet"):
-        raise ValueError("`alphabet` must be defined in {path}.")
+        raise ValueError(f"`alphabet` must be defined in {path}.")
     if not hasattr(mod, "accepts"):
-        raise ValueError("`accepts` must be defined in {path}.")
+        raise ValueError(f"`accepts` must be defined in {path}.")
 
     alphabet = getattr(mod, "alphabet")
     accepts = getattr(mod, "accepts")
