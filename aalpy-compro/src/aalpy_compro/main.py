@@ -6,6 +6,7 @@ from .__internal.eq_oracles import (
     WpSpec,
     RandomWpSpec,
     StatePrefixSpec,
+    EqOracleList,
     EqOracleSpec,
 )
 from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
@@ -58,7 +59,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--oracle",
-        choices=["wp", "random_wp", "state_prefix"],
+        choices=EqOracleList,
         default=None,
     )
     parser.add_argument(
