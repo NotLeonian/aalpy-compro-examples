@@ -115,8 +115,8 @@ def parse_aalpy_dfa_dot(dot_text: str, *, drop_unreachable: bool = True) -> Pars
 
         accepting = {s: accepting.get(s, False) for s in reachable}
         trans = {
-            (src, lab): dst
-            for (src, lab), dst in trans.items()
+            (src, label): dst
+            for (src, label), dst in trans.items()
             if src in reachable and dst in reachable
         }
 
@@ -135,6 +135,7 @@ def dot_to_cpp(
     alphabet: Sequence[T],
     symbol_to_label: Callable[[T], str] = str,
     namespace: str = "learned_dfa",
+    key: str = "",
     add_sink_if_missing: bool = True,
 ) -> str:
     """
@@ -154,10 +155,10 @@ def dot_to_cpp(
 
     idx = {s: i for i, s in enumerate(parsed.states)}
     n = len(parsed.states)
-    k = len(labels)
+    sigma = len(labels)
     initial_state = idx[parsed.initial_state]
 
-    trans_table: list[list[int]] = [[-1] * k for _ in range(n)]
+    trans_table: list[list[int]] = [[-1] * sigma for _ in range(n)]
     for i, src in enumerate(parsed.states):
         for label, j in label_to_col.items():
             _dst: str | None = adj.get(src, {}).get(label)
@@ -166,49 +167,49 @@ def dot_to_cpp(
 
     sink = None
     if add_sink_if_missing and any(
-        trans_table[i][j] < 0 for i in range(n) for j in range(k)
+        trans_table[i][j] < 0 for i in range(n) for j in range(sigma)
     ):
         sink = n
         for i in range(n):
-            for j in range(k):
+            for j in range(sigma):
                 if trans_table[i][j] < 0:
                     trans_table[i][j] = sink
-        trans_table.append([sink] * k)
+        trans_table.append([sink] * sigma)
         n += 1
 
-    accepting = ["true"] * n
+    accepting = [0] * n
     for i, s in enumerate(parsed.states):
-        accepting[i] = "true" if parsed.accepting.get(s, False) else "false"
+        accepting[i] = 1 if parsed.accepting.get(s, False) else 0
 
     res: list[str] = []
-    res.append(f"// States: {n}, Alphabet: {k}")
+    res.append("#include <array>")
+    res.append("")
+    res.append(f"namespace {namespace}_{key} {{")
+    res.append(f"// States: {n}, Alphabet: {sigma}")
     res.append("// Symbol index mapping:")
-    for j, lab in enumerate(labels):
-        res.append(f"//   {j}: {lab}")
+    for j, label in enumerate(labels):
+        res.append(f"//   {j}: {label}")
     res.append("")
-    res.append(f"namespace {namespace} {{")
-    res.append(f"static constexpr int N = {n};")
-    res.append(f"static constexpr int SIGMA = {k};")
-    res.append(f"static constexpr int INITIAL_STATE = {initial_state};")
-    res.append(
-        "static constexpr bool ACCEPTING[N] = { "
-        + ", ".join(map(str, accepting))
-        + " };"
-    )
-    res.append("static constexpr int TRANS[N][SIGMA] = {")
+    res.append(f"inline constexpr int N = {n};")
+    res.append(f"inline constexpr int SIGMA = {sigma};")
+    res.append(f"inline constexpr int INITIAL_STATE = {initial_state};")
+    res.append("")
+    res.append("inline constexpr std::array<unsigned char, N> ACCEPTING = {{")
+    res.append(f"    {', '.join(map(str, accepting))}")
+    res.append("}};")
+    res.append("")
+    res.append("inline constexpr std::array<std::array<int, SIGMA>, N> TRANS = {{")
     for i in range(n):
-        res.append("    { " + ", ".join(map(str, trans_table[i])) + " },")
-    res.append("};")
+        res.append(f"    {{{{{', '.join(map(str, trans_table[i]))}}}}},")
+    res.append("}};")
     res.append("")
-    res.append("template <class It>")
-    res.append("bool accepts(It begin, It end) {")
-    res.append("    int cur = INITIAL_STATE;")
-    res.append("    for (auto it = begin; it != end; ++it) {")
-    res.append("        const int label = *it;")
-    res.append("        cur = TRANS[cur][label];")
-    res.append("    }")
-    res.append("    return ACCEPTING[cur];")
-    res.append("}")
-    res.append(f"}} // namespace {namespace}")
+    res.append(f"static const int __{namespace}_register_{key} = [] {{")
+    res.append(
+        f'    {namespace}::dfas().register_dfa(INITIAL_STATE, ACCEPTING, TRANS, "{key}");'
+    )
+    res.append("    return 0;")
+    res.append("}();")
+    res.append(f"}} // namespace {namespace}_{key}")
+    res.append("")
 
     return "\n".join(res)

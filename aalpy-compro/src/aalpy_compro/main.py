@@ -1,40 +1,20 @@
+from collections.abc import Callable
 import argparse
-from dataclasses import dataclass
+import re
 
 from .__internal.eq_oracles import (
-    EqOracleLiteral,
     WpSpec,
     RandomWpSpec,
     StatePrefixSpec,
     EqOracleSpec,
 )
-from .__internal.learn_dfa import KVCexProcessing, LearnConfig, learn_dfa_KV
+from .__internal.learn_dfa import LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
+from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.load_property import load_property
-
-
-@dataclass(frozen=True)
-class LearnArgs:
-    """
-    コマンドライン引数で与えられるオプションのクラス
-    """
-
-    path: str
-    oracle: EqOracleLiteral
-    output: str
-    namespace: str
-    cex_processing: KVCexProcessing
-    max_rounds: int | None
-    no_cache: bool
-    print_level: int
-    max_states: int | None
-    min_length: int
-    expected_length: int
-    num_tests: int
-    walks_per_state: int
-    walk_len: int
-    max_tests: int | None
-    depth_first: bool
+from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
+from .__internal.fullmatch import validate_fullmatch_pattern
+from .__internal.main_args import MainArgs
 
 
 def main() -> None:
@@ -45,17 +25,60 @@ def main() -> None:
     オプションはコマンドライン引数で与える
     """
 
+    def parse_fullmatch_pattern(
+        *,
+        pattern: re.Pattern[str],
+        arg_name: str,
+    ) -> Callable[[str], str]:
+        def __validator(value: str) -> str:
+            validate_fullmatch_pattern(
+                pattern=pattern,
+                string=value,
+                exception=argparse.ArgumentTypeError(
+                    f"{arg_name} must match /{pattern.pattern}/."
+                ),
+            )
+
+            return value
+
+        return __validator
+
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--kind",
+        choices=["learn", "common"],
+        help='Select "learn" or "common" (default: "learn").',
+        default="learn",
+    )
     parser.add_argument(
         "--path",
-        required=True,
         help="Path to .py file providing alphabet/accepts",
+        default=None,
     )
     parser.add_argument(
-        "--oracle", required=True, choices=["wp", "random_wp", "state_prefix"]
+        "--oracle",
+        choices=["wp", "random_wp", "state_prefix"],
+        default=None,
     )
-    parser.add_argument("-o", "--output", default="learned.cpp")
-    parser.add_argument("--namespace", default="learned_dfa")
+    parser.add_argument(
+        "--namespace",
+        type=parse_fullmatch_pattern(pattern=NAMESPACE_PATTERN, arg_name="namespace"),
+        help=f"--namespace must match /{NAMESPACE_PATTERN.pattern}/.",
+        default="learned_dfa",
+    )
+    parser.add_argument(
+        "--key",
+        type=parse_fullmatch_pattern(pattern=KEY_PATTERN, arg_name="key"),
+        help="\n".join(
+            [
+                f"--key must match /{KEY_PATTERN.pattern}/.",
+                'When --kind is "learn", effectively required.',
+                "Each name should be unique.",
+            ]
+        ),
+        default=None,
+    )
 
     # KV params
     parser.add_argument("--cex-processing", default="rs")
@@ -80,51 +103,63 @@ def main() -> None:
     parser.add_argument("--no-depth-first", dest="depth_first", action="store_false")
     parser.set_defaults(depth_first=True)
 
-    args = LearnArgs(**vars(parser.parse_args()))
+    args = MainArgs(**vars(parser.parse_args()))
 
-    property = load_property(args.path)
+    if args.kind == "learn":
+        if args.path is None:
+            raise SystemExit("--kind learn requires --path.")
+        if args.oracle is None:
+            raise SystemExit("--kind learn requires --oracle.")
 
-    if args.oracle == "wp":
-        if args.max_states is None:
-            raise SystemExit("--oracle wp requires --max-states.")
-        oracle_spec: EqOracleSpec = WpSpec(max_states=args.max_states)
-    elif args.oracle == "random_wp":
-        oracle_spec = RandomWpSpec(
-            min_length=args.min_length,
-            expected_length=args.expected_length,
-            num_tests=args.num_tests,
+        property = load_property(args.path)
+
+        if args.oracle == "wp":
+            if args.max_states is None:
+                raise SystemExit("--oracle wp requires --max-states.")
+            oracle_spec: EqOracleSpec = WpSpec(max_states=args.max_states)
+        elif args.oracle == "random_wp":
+            oracle_spec = RandomWpSpec(
+                min_length=args.min_length,
+                expected_length=args.expected_length,
+                num_tests=args.num_tests,
+            )
+        else:  # args.oracle == "state_prefix"
+            oracle_spec = StatePrefixSpec(
+                walks_per_state=args.walks_per_state,
+                walk_len=args.walk_len,
+                max_tests=args.max_tests,
+                depth_first=args.depth_first,
+            )
+
+        learn_config = LearnConfig(
+            cex_processing=args.cex_processing,
+            max_learning_rounds=args.max_rounds,
+            cache_and_non_det_check=(not args.no_cache),
+            print_level=args.print_level,
         )
-    else:  # args.oracle == "state_prefix"
-        oracle_spec = StatePrefixSpec(
-            walks_per_state=args.walks_per_state,
-            walk_len=args.walk_len,
-            max_tests=args.max_tests,
-            depth_first=args.depth_first,
+
+        dfa = learn_dfa_KV(
+            alphabet=property.alphabet,
+            accepts=property.accepts,
+            oracle_spec=oracle_spec,
+            learn_config=learn_config,
         )
 
-    learn_config = LearnConfig(
-        cex_processing=args.cex_processing,
-        max_learning_rounds=args.max_rounds,
-        cache_and_non_det_check=(not args.no_cache),
-        print_level=args.print_level,
-    )
+        assert args.key is not None  # MainArgs の __post_init__ で弾かれている
+        res = dot_to_cpp(
+            dot_text=dfa_to_dot_string(dfa),
+            alphabet=property.alphabet,
+            symbol_to_label=property.symbol_to_label,
+            namespace=args.namespace,
+            key=args.key,
+            add_sink_if_missing=True,
+        )
 
-    dfa = learn_dfa_KV(
-        alphabet=property.alphabet,
-        accepts=property.accepts,
-        oracle_spec=oracle_spec,
-        learn_config=learn_config,
-    )
+        print(res)
+    else:
+        res = common_dfa_struct(namespace=args.namespace)
 
-    res = dot_to_cpp(
-        dot_text=dfa_to_dot_string(dfa),
-        alphabet=property.alphabet,
-        symbol_to_label=property.symbol_to_label,
-        namespace=args.namespace,
-        add_sink_if_missing=True,
-    )
-    with open(args.output, "w", encoding="utf-8") as f:
-        f.write(res)
+        print(res)
 
 
 if __name__ == "__main__":
