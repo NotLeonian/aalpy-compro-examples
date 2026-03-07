@@ -25,7 +25,7 @@ def load_property(path: str) -> LearningProperty[object]:
 
     spec = spec_from_file_location("learning_property", path)
     if spec is None or spec.loader is None:
-        raise ValueError(f"Cannot load property from {path}")
+        raise ValueError(f"Cannot load property from {path}.")
 
     mod = module_from_spec(spec)
     spec.loader.exec_module(mod)
