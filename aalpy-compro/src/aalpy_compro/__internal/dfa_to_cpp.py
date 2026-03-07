@@ -147,7 +147,7 @@ def dot_to_cpp(
     labels = [symbol_to_label(a) for a in alphabet]
     label_to_col = {label: i for i, label in enumerate(labels)}
     if len(label_to_col) != len(labels):
-        raise ValueError("alphabet has duplicate labels after symbol_to_label().")
+        raise ValueError("`alphabet` has duplicate labels after `symbol_to_label`.")
 
     adj: dict[str, dict[str, str]] = {s: {} for s in parsed.states}
     for (src, label), dst in parsed.trans.items():
