@@ -78,11 +78,13 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("        }")
     res.append("    }")
     res.append("")
-    res.append("    const int state_size() const { return n; }")
-    res.append("    const int alphabet_size() const { return sigma; }")
-    res.append("    const int index_of_initial_state() const { return initial_state; }")
+    res.append("    int state_size() const noexcept { return n; }")
+    res.append("    int alphabet_size() const noexcept { return sigma; }")
+    res.append(
+        "    int index_of_initial_state() const noexcept { return initial_state; }"
+    )
     res.append("")
-    res.append("    const std::string &get_key() const { return key; }")
+    res.append("    const std::string &get_key() const & noexcept { return key; }")
     res.append("")
     res.append("    bool is_accepting(int src) const {")
     res.append("        if (src < 0 || src >= n) {")
@@ -107,9 +109,11 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("    std::vector<DFA> dfas;")
     res.append("")
     res.append("  public:")
-    res.append("    const std::vector<DFA> &operator()() { return dfas; }")
+    res.append(
+        "    const std::vector<DFA> &operator()() const & noexcept { return dfas; }"
+    )
     res.append("")
-    res.append("    const int index_of(const std::string &key) const {")
+    res.append("    int index_of(const std::string &key) const {")
     res.append("        auto it = std::find_if(")
     res.append("            dfas.begin(), dfas.end(),")
     res.append(
@@ -122,7 +126,7 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("        }")
     res.append("    }")
     res.append("")
-    res.append("    const DFA &get(const std::string &key) const {")
+    res.append("    const DFA &get(const std::string &key) const & {")
     res.append("        int i = index_of(key);")
     res.append("        if (i < 0) {")
     res.append("            std::abort();")
