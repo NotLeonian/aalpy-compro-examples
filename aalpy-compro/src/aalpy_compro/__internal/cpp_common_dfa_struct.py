@@ -41,6 +41,12 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("          accepting(accepting), trans(trans), key(key) {")
     res.append("        assert(n >= 0);")
     res.append("        assert(sigma >= 0);")
+    res.append("")
+    res.append("        assert(static_cast<int>(accepting.size()) >= n);")
+    res.append("        assert(static_cast<int>(trans.size()) >= n);")
+    res.append("        for (int i = 0; i < n; i += 1) {")
+    res.append("            assert(static_cast<int>(trans[i].size()) >= sigma);")
+    res.append("        }")
     res.append("    }")
     res.append("")
     res.append("    template <std::size_t N, std::size_t SIGMA>")
@@ -50,11 +56,13 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append(
         "        const std::array<std::array<int, SIGMA>, N> &tr, const std::string &key)"
     )
-    res.append("        : n(N), sigma(SIGMA), initial_state(initial_state),")
     res.append(
-        "          accepting(acc.begin(), acc.end()), trans(N, std::vector<int>(SIGMA)),"
+        "        : n(N), sigma(SIGMA), initial_state(initial_state), accepting(N),"
     )
-    res.append("          key(key) {")
+    res.append("          trans(N, std::vector<int>(SIGMA)), key(key) {")
+    res.append("        for (int i = 0; i < N; i += 1) {")
+    res.append("            accepting[i] = acc[i];")
+    res.append("        }")
     res.append("        for (int i = 0; i < N; i += 1) {")
     res.append("            for (int j = 0; j < SIGMA; j += 1) {")
     res.append("                trans[i][j] = tr[i][j];")
