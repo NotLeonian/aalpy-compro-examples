@@ -6,11 +6,20 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     # TODO: DFA のメソッドを実装する
 
     res: list[str] = []
-    for header_name in ["algorithm", "array", "cstddef", "cstdlib", "string", "vector"]:
+    for header_name in [
+        "algorithm",
+        "array",
+        "cassert",
+        "cstddef",
+        "cstdlib",
+        "string",
+        "vector",
+    ]:
         res.append(f"#include <{header_name}>")
     res.append("")
     res.append(f"namespace {namespace} {{")
-    res.append("struct DFA {")
+    res.append("class DFA {")
+    res.append("  private:")
     res.append("    int n;")
     res.append("    int sigma;")
     res.append("    int initial_state;")
@@ -20,13 +29,25 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("")
     res.append("    std::string key;")
     res.append("")
+    res.append("    // initial_state や trans などが範囲外となることも一応許容する")
+    res.append("")
+    res.append("  public:")
     res.append("    DFA(const int n, const int sigma, const int initial_state,")
     res.append("        const std::vector<unsigned char> &accepting,")
     res.append(
         "        const std::vector<std::vector<int>> &trans, const std::string &key)"
     )
     res.append("        : n(n), sigma(sigma), initial_state(initial_state),")
-    res.append("          accepting(accepting), trans(trans), key(key) {}")
+    res.append("          accepting(accepting), trans(trans), key(key) {")
+    res.append("        assert(n >= 0);")
+    res.append("        assert(sigma >= 0);")
+    res.append("")
+    res.append("        assert(static_cast<int>(accepting.size()) >= n);")
+    res.append("        assert(static_cast<int>(trans.size()) >= n);")
+    res.append("        for (int i = 0; i < n; i += 1) {")
+    res.append("            assert(static_cast<int>(trans[i].size()) >= sigma);")
+    res.append("        }")
+    res.append("    }")
     res.append("")
     res.append("    template <std::size_t N, std::size_t SIGMA>")
     res.append(
@@ -36,26 +57,63 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
         "        const std::array<std::array<int, SIGMA>, N> &tr, const std::string &key)"
     )
     res.append("        : n(N), sigma(SIGMA), initial_state(initial_state),")
-    res.append(
-        "          accepting(acc.begin(), acc.end()), trans(N, std::vector<int>(SIGMA)),"
-    )
-    res.append("          key(key) {")
+    res.append("          accepting(N, static_cast<unsigned char>(false)),")
+    res.append("          trans(N, std::vector<int>(SIGMA, -1)), key(key) {")
     res.append("        for (int i = 0; i < N; i += 1) {")
+    res.append("            if (i >= static_cast<int>(acc.size())) {")
+    res.append("                break;")
+    res.append("            }")
+    res.append("            accepting[i] = acc[i];")
+    res.append("        }")
+    res.append("        for (int i = 0; i < N; i += 1) {")
+    res.append("            if (i >= static_cast<int>(trans.size())) {")
+    res.append("                break;")
+    res.append("            }")
     res.append("            for (int j = 0; j < SIGMA; j += 1) {")
+    res.append("                if (j >= static_cast<int>(trans[i].size())) {")
+    res.append("                    break;")
+    res.append("                }")
     res.append("                trans[i][j] = tr[i][j];")
     res.append("            }")
     res.append("        }")
     res.append("    }")
+    res.append("")
+    res.append("    const int state_size() const { return n; }")
+    res.append("    const int alphabet_size() const { return sigma; }")
+    res.append("    const int index_of_initial_state() const { return initial_state; }")
+    res.append("")
+    res.append("    const std::string &get_key() const { return key; }")
+    res.append("")
+    res.append("    bool is_accepting(int src) const {")
+    res.append("        if (src < 0 || src >= n) {")
+    res.append("            return false;")
+    res.append("        }")
+    res.append("        return static_cast<bool>(accepting[src]);")
+    res.append("    }")
+    res.append("")
+    res.append("    const int next(int src, int label) const {")
+    res.append("        if (src < 0 || src >= n) {")
+    res.append("            return -1;")
+    res.append("        }")
+    res.append("        if (label < 0 || label >= sigma) {")
+    res.append("            return -1;")
+    res.append("        }")
+    res.append("        return trans[src][label];")
+    res.append("    }")
     res.append("};")
     res.append("")
-    res.append("struct DFAs {")
+    res.append("class DFAs {")
+    res.append("  private:")
     res.append("    std::vector<DFA> dfas;")
     res.append("")
-    res.append("    int index_of(const std::string &key) const {")
+    res.append("  public:")
+    res.append("    const std::vector<DFA> &operator()() { return dfas; }")
+    res.append("")
+    res.append("    const int index_of(const std::string &key) const {")
     res.append("        auto it = std::find_if(")
     res.append("            dfas.begin(), dfas.end(),")
     res.append(
-        "            [&key](const DFA &dfa) -> bool { return dfa.key == key; });"
+        "            [&key](const DFA &dfa) -> bool { return dfa.get_key() == key; });"
     )
     res.append("        if (it != dfas.end()) {")
     res.append("            return static_cast<int>(it - dfas.begin());")
