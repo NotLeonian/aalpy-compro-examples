@@ -51,7 +51,7 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("struct DFAs {")
     res.append("    std::vector<DFA> dfas;")
     res.append("")
-    res.append("    int index_of(const std::string &key) const {")
+    res.append("    const int index_of(const std::string &key) const {")
     res.append("        auto it = std::find_if(")
     res.append("            dfas.begin(), dfas.end(),")
     res.append(
