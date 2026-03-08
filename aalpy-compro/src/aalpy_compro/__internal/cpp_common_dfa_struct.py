@@ -9,6 +9,7 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     for header_name in [
         "algorithm",
         "array",
+        "cassert",
         "cstddef",
         "cstdlib",
         "string",
@@ -17,7 +18,8 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
         res.append(f"#include <{header_name}>")
     res.append("")
     res.append(f"namespace {namespace} {{")
-    res.append("struct DFA {")
+    res.append("class DFA {")
+    res.append("  private:")
     res.append("    int n;")
     res.append("    int sigma;")
     res.append("    int initial_state;")
@@ -27,6 +29,7 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("")
     res.append("    std::string key;")
     res.append("")
+    res.append("  public:")
     res.append("    DFA(const int n, const int sigma, const int initial_state,")
     res.append("        const std::vector<unsigned char> &accepting,")
     res.append(
@@ -53,16 +56,39 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("            }")
     res.append("        }")
     res.append("    }")
+    res.append("")
+    res.append("    const int state_size() const { return n; }")
+    res.append("    const int alphabet_size() const { return sigma; }")
+    res.append("    const int index_of_initial_state() const { return initial_state; }")
+    res.append("")
+    res.append("    const std::string &get_key() const { return key; }")
+    res.append("")
+    res.append("    bool is_accepting(int src) const {")
+    res.append("        assert(src >= 0 && src < n);")
+    res.append("        return static_cast<bool>(accepting[src]);")
+    res.append("    }")
+    res.append("")
+    res.append("    const int next(int src, int label) const {")
+    res.append("        assert(src >= 0 && src < n);")
+    res.append("        if (label < 0 || label >= sigma) {")
+    res.append("            return -1;")
+    res.append("        }")
+    res.append("        return trans[src][label];")
+    res.append("    }")
     res.append("};")
     res.append("")
-    res.append("struct DFAs {")
+    res.append("class DFAs {")
+    res.append("  private:")
     res.append("    std::vector<DFA> dfas;")
+    res.append("")
+    res.append("  public:")
+    res.append("    const std::vector<DFA> &operator()() { return dfas; }")
     res.append("")
     res.append("    const int index_of(const std::string &key) const {")
     res.append("        auto it = std::find_if(")
     res.append("            dfas.begin(), dfas.end(),")
     res.append(
-        "            [&key](const DFA &dfa) -> bool { return dfa.key == key; });"
+        "            [&key](const DFA &dfa) -> bool { return dfa.get_key() == key; });"
     )
     res.append("        if (it != dfas.end()) {")
     res.append("            return static_cast<int>(it - dfas.begin());")
