@@ -6,7 +6,14 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     # TODO: DFA のメソッドを実装する
 
     res: list[str] = []
-    for header_name in ["algorithm", "array", "cstddef", "cstdlib", "string", "vector"]:
+    for header_name in [
+        "algorithm",
+        "array",
+        "cstddef",
+        "cstdlib",
+        "string",
+        "vector",
+    ]:
         res.append(f"#include <{header_name}>")
     res.append("")
     res.append(f"namespace {namespace} {{")
