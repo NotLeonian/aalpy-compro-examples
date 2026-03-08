@@ -93,7 +93,7 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append("        return static_cast<bool>(accepting[src]);")
     res.append("    }")
     res.append("")
-    res.append("    const int next(int src, int label) const {")
+    res.append("    int next(int src, int label) const {")
     res.append("        if (src < 0 || src >= n) {")
     res.append("            return -1;")
     res.append("        }")
