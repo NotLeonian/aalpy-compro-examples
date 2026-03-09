@@ -235,6 +235,109 @@ class DFA {
     bool accepts(const Range &r) const {
         return accepts(r, internal::to_int{});
     }
+
+    // 空でない部分文字列のうち、受理されるものの長さの最大値
+    //
+    // 受理される空でない部分文字列が存在しなければ -1 を返す
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    //
+    // to_index: 各文字をラベルに変換する関数
+    template <class It, class ToIndex,
+              std::enable_if_t<internal::accepts_iter_enabled_v<It, ToIndex>,
+                               int> = 0>
+    int longest_accepted_substring_length(It first, It last,
+                                          ToIndex to_index) const {
+        int ans = -1;
+
+        std::vector<int> dp_table(n, -1), next_table(n, -1);
+        for (; first != last; ++first) {
+            const int label = std::invoke(to_index, *first);
+            std::fill(next_table.begin(), next_table.end(), -1);
+
+            if (label >= 0 && label < sigma) {
+                {
+                    // 長さ 1
+                    int next_state = next(initial_state, label);
+                    if (next_state >= 0 && next_state < n) {
+                        next_table[next_state] = 1;
+                    }
+                }
+
+                for (int i = 0; i < n; i += 1) {
+                    // 長さ 2 以上
+                    if (dp_table[i] > 0) {
+                        int next_state = next(i, label);
+                        if (next_state >= 0 && next_state < n) {
+                            int cand = dp_table[i] + 1;
+                            if (next_table[next_state] < cand) {
+                                next_table[next_state] = cand;
+                            }
+                        }
+                    }
+                }
+            }
+
+            dp_table.swap(next_table);
+
+            for (int i = 0; i < n; i += 1) {
+                if (is_accepting(i) && ans < dp_table[i]) {
+                    ans = dp_table[i];
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    // 空でない部分文字列のうち、受理されるものの長さの最大値
+    //
+    // 受理される空でない部分文字列が存在しなければ -1 を返す
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    //
+    // to_index: 各文字をラベルに変換する関数
+    template <
+        class Range, class ToIndex,
+        std::enable_if_t<
+            internal::accepts_range_enabled_v<Range, std::decay_t<ToIndex>> &&
+                std::is_constructible_v<std::decay_t<ToIndex>, ToIndex &&>,
+            int> = 0>
+    int longest_accepted_substring_length(const Range &r,
+                                          ToIndex &&to_index) const {
+        using std::begin;
+        using std::end;
+        using F = std::decay_t<ToIndex>;
+
+        return longest_accepted_substring_length(
+            begin(r), end(r), F(std::forward<ToIndex>(to_index)));
+    }
+
+    // 空でない部分文字列のうち、受理されるものの長さの最大値
+    //
+    // 受理される空でない部分文字列が存在しなければ -1 を返す
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    template <
+        class It,
+        std::enable_if_t<internal::accepts_iter_enabled_v<It, internal::to_int>,
+                         int> = 0>
+    int longest_accepted_substring_length(It first, It last) const {
+        return longest_accepted_substring_length(first, last,
+                                                 internal::to_int{});
+    }
+
+    // 空でない部分文字列のうち、受理されるものの長さの最大値
+    //
+    // 受理される空でない部分文字列が存在しなければ -1 を返す
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    template <class Range, std::enable_if_t<internal::accepts_range_enabled_v<
+                                                Range, internal::to_int>,
+                                            int> = 0>
+    int longest_accepted_substring_length(const Range &r) const {
+        return longest_accepted_substring_length(r, internal::to_int{});
+    }
 };
 
 class DFAs {
