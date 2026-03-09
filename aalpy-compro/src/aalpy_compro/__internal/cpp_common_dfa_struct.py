@@ -12,13 +12,104 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
         "cassert",
         "cstddef",
         "cstdlib",
+        "functional",
+        "iterator",
         "string",
+        "type_traits",
+        "utility",
         "vector",
     ]:
         res.append(f"#include <{header_name}>")
     res.append("")
     res.append(f"namespace {namespace} {{")
     res.append("""\
+namespace internal {
+template <class Range> decltype(auto) adl_begin(Range &&r) {
+    using std::begin;
+    return begin(std::forward<Range>(r));
+}
+
+template <class Range> decltype(auto) adl_end(Range &&r) {
+    using std::end;
+    return end(std::forward<Range>(r));
+}
+
+template <class It> using iter_ref_t = decltype(*std::declval<It &>());
+
+template <class Range>
+using range_begin_t = decltype(adl_begin(std::declval<const Range &>()));
+
+template <class Range>
+using range_end_t = decltype(adl_end(std::declval<const Range &>()));
+
+template <class, class = void> struct is_input_iterator : std::false_type {};
+
+template <class It>
+struct is_input_iterator<
+    It, std::void_t<typename std::iterator_traits<It>::iterator_category,
+                    decltype(*std::declval<It &>()),
+                    decltype(++std::declval<It &>()),
+                    decltype(std::declval<It &>() == std::declval<It &>()),
+                    decltype(std::declval<It &>() != std::declval<It &>())>>
+    : std::bool_constant<std::is_base_of_v<
+          std::input_iterator_tag,
+          typename std::iterator_traits<It>::iterator_category>> {};
+
+template <class It>
+inline constexpr bool is_input_iterator_v = is_input_iterator<It>::value;
+
+template <class It, class ToIndex, class = void>
+struct accepts_iter_enabled : std::false_type {};
+
+template <class It, class ToIndex>
+struct accepts_iter_enabled<
+    It, ToIndex,
+    std::void_t<iter_ref_t<It>,
+                std::invoke_result_t<ToIndex &, iter_ref_t<It>>>>
+    : std::bool_constant<
+          is_input_iterator_v<It> &&
+          std::is_invocable_r_v<int, ToIndex &, iter_ref_t<It>>> {};
+
+template <class It, class ToIndex>
+inline constexpr bool accepts_iter_enabled_v =
+    accepts_iter_enabled<It, ToIndex>::value;
+
+template <class Range, class ToIndex, class = void>
+struct accepts_range_enabled : std::false_type {};
+
+template <class Range, class ToIndex>
+struct accepts_range_enabled<
+    Range, ToIndex, std::void_t<range_begin_t<Range>, range_end_t<Range>>>
+    : std::bool_constant<
+          std::is_same_v<range_begin_t<Range>, range_end_t<Range>> &&
+          accepts_iter_enabled_v<range_begin_t<Range>, ToIndex>> {};
+
+template <class Range, class ToIndex>
+inline constexpr bool accepts_range_enabled_v =
+    accepts_range_enabled<Range, ToIndex>::value;
+
+template <class T, class = void>
+struct is_static_castable_to_int : std::false_type {};
+
+template <class T>
+struct is_static_castable_to_int<
+    T, std::void_t<decltype(static_cast<int>(std::declval<T>()))>>
+    : std::true_type {};
+
+template <class T>
+inline constexpr bool is_static_castable_to_int_v =
+    is_static_castable_to_int<T>::value;
+
+struct to_int {
+    template <class T,
+              std::enable_if_t<is_static_castable_to_int_v<T &&>, int> = 0>
+    constexpr int operator()(T &&x) const
+        noexcept(noexcept(static_cast<int>(std::forward<T>(x)))) {
+        return static_cast<int>(std::forward<T>(x));
+    }
+};
+} // namespace internal
+
 class DFA {
   private:
     int n;
@@ -84,6 +175,53 @@ class DFA {
         }
         return trans[src][label];
     }
+
+    template <class It, class ToIndex,
+              std::enable_if_t<internal::accepts_iter_enabled_v<It, ToIndex>,
+                               int> = 0>
+    bool accepts(It first, It last, ToIndex to_index) const {
+        int cur = initial_state;
+        for (; first != last; ++first) {
+            if (cur < 0 || cur >= n) {
+                return false;
+            }
+            const int label = std::invoke(to_index, *first);
+            if (label < 0 || label >= sigma) {
+                return false;
+            }
+            cur = trans[cur][label];
+        }
+
+        // is_accepting 関数側でも cur が範囲内であるかどうかはチェックされる
+        return is_accepting(cur);
+    }
+
+    template <
+        class Range, class ToIndex,
+        std::enable_if_t<
+            internal::accepts_range_enabled_v<Range, std::decay_t<ToIndex>> &&
+                std::is_constructible_v<std::decay_t<ToIndex>, ToIndex &&>,
+            int> = 0>
+    bool accepts(const Range &r, ToIndex &&to_index) const {
+        using F = std::decay_t<ToIndex>;
+        return accepts(internal::adl_begin(r), internal::adl_end(r),
+                       F(std::forward<ToIndex>(to_index)));
+    }
+
+    template <
+        class It,
+        std::enable_if_t<internal::accepts_iter_enabled_v<It, internal::to_int>,
+                         int> = 0>
+    bool accepts(It first, It last) const {
+        return accepts(first, last, internal::to_int{});
+    }
+
+    template <class Range, std::enable_if_t<internal::accepts_range_enabled_v<
+                                                Range, internal::to_int>,
+                                            int> = 0>
+    bool accepts(const Range &r) const {
+        return accepts(r, internal::to_int{});
+    }
 };
 
 class DFAs {
@@ -130,7 +268,7 @@ class DFAs {
 inline DFAs &dfas() {
     static DFAs dfas;
     return dfas;
-}
+}\
 """)
     res.append(f"}} // namespace {namespace}")
     res.append("")
