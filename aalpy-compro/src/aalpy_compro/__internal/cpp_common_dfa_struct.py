@@ -12,138 +12,259 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
         "cassert",
         "cstddef",
         "cstdlib",
+        "functional",
+        "iterator",
         "string",
+        "type_traits",
+        "utility",
         "vector",
     ]:
         res.append(f"#include <{header_name}>")
     res.append("")
     res.append(f"namespace {namespace} {{")
-    res.append("class DFA {")
-    res.append("  private:")
-    res.append("    int n;")
-    res.append("    int sigma;")
-    res.append("    int initial_state;")
-    res.append("")
-    res.append("    std::vector<unsigned char> accepting;")
-    res.append("    std::vector<std::vector<int>> trans;")
-    res.append("")
-    res.append("    std::string key;")
-    res.append("")
-    res.append("    // initial_state や trans などが範囲外となることも一応許容する")
-    res.append("")
-    res.append("  public:")
-    res.append("    DFA(const int n, const int sigma, const int initial_state,")
-    res.append("        const std::vector<unsigned char> &accepting,")
-    res.append(
-        "        const std::vector<std::vector<int>> &trans, const std::string &key)"
-    )
-    res.append("        : n(n), sigma(sigma), initial_state(initial_state),")
-    res.append("          accepting(accepting), trans(trans), key(key) {")
-    res.append("        assert(n >= 0);")
-    res.append("        assert(sigma >= 0);")
-    res.append("")
-    res.append("        assert(static_cast<int>(accepting.size()) >= n);")
-    res.append("        assert(static_cast<int>(trans.size()) >= n);")
-    res.append("        for (int i = 0; i < n; i += 1) {")
-    res.append("            assert(static_cast<int>(trans[i].size()) >= sigma);")
-    res.append("        }")
-    res.append("    }")
-    res.append("")
-    res.append("    template <std::size_t N, std::size_t SIGMA>")
-    res.append(
-        "    DFA(const int initial_state, const std::array<unsigned char, N> &acc,"
-    )
-    res.append(
-        "        const std::array<std::array<int, SIGMA>, N> &tr, const std::string &key)"
-    )
-    res.append("        : n(N), sigma(SIGMA), initial_state(initial_state),")
-    res.append(
-        "          accepting(acc.begin(), acc.end()), trans(N, std::vector<int>(SIGMA)),"
-    )
-    res.append("          key(key) {")
-    res.append("        // acc と tr の要素数は決まっている")
-    res.append("        for (int i = 0; i < N; i += 1) {")
-    res.append("            for (int j = 0; j < SIGMA; j += 1) {")
-    res.append("                trans[i][j] = tr[i][j];")
-    res.append("            }")
-    res.append("        }")
-    res.append("    }")
-    res.append("")
-    res.append("    int state_size() const noexcept { return n; }")
-    res.append("    int alphabet_size() const noexcept { return sigma; }")
-    res.append(
-        "    int index_of_initial_state() const noexcept { return initial_state; }"
-    )
-    res.append("")
-    res.append("    const std::string &get_key() const & noexcept { return key; }")
-    res.append("")
-    res.append("    bool is_accepting(int src) const {")
-    res.append("        if (src < 0 || src >= n) {")
-    res.append("            return false;")
-    res.append("        }")
-    res.append("        return static_cast<bool>(accepting[src]);")
-    res.append("    }")
-    res.append("")
-    res.append("    int next(int src, int label) const {")
-    res.append("        if (src < 0 || src >= n) {")
-    res.append("            return -1;")
-    res.append("        }")
-    res.append("        if (label < 0 || label >= sigma) {")
-    res.append("            return -1;")
-    res.append("        }")
-    res.append("        return trans[src][label];")
-    res.append("    }")
-    res.append("};")
-    res.append("")
-    res.append("class DFAs {")
-    res.append("  private:")
-    res.append("    std::vector<DFA> dfas;")
-    res.append("")
-    res.append("  public:")
-    res.append(
-        "    const std::vector<DFA> &operator()() const & noexcept { return dfas; }"
-    )
-    res.append("")
-    res.append("    int index_of(const std::string &key) const {")
-    res.append("        auto it = std::find_if(")
-    res.append("            dfas.begin(), dfas.end(),")
-    res.append(
-        "            [&key](const DFA &dfa) -> bool { return dfa.get_key() == key; });"
-    )
-    res.append("        if (it != dfas.end()) {")
-    res.append("            return static_cast<int>(it - dfas.begin());")
-    res.append("        } else {")
-    res.append("            return -1;")
-    res.append("        }")
-    res.append("    }")
-    res.append("")
-    res.append("    const DFA &get(const std::string &key) const & {")
-    res.append("        int i = index_of(key);")
-    res.append("        if (i < 0) {")
-    res.append("            std::abort();")
-    res.append("        }")
-    res.append("        return dfas[i];")
-    res.append("    }")
-    res.append("")
-    res.append("    template <std::size_t N, std::size_t SIGMA>")
-    res.append("    void register_dfa(const int initial_state,")
-    res.append("                      const std::array<unsigned char, N> &acc,")
-    res.append("                      const std::array<std::array<int, SIGMA>, N> &tr,")
-    res.append("                      const std::string &key) {")
-    res.append("        DFA dfa(initial_state, acc, tr, key);")
-    res.append("")
-    res.append("        int i = index_of(key);")
-    res.append("        if (i >= 0) {")
-    res.append("            std::abort(); // already exists")
-    res.append("        }")
-    res.append("        dfas.emplace_back(dfa);")
-    res.append("    }")
-    res.append("};")
-    res.append("")
-    res.append("inline DFAs &dfas() {")
-    res.append("    static DFAs dfas;")
-    res.append("    return dfas;")
-    res.append("}")
+    res.append("""\
+namespace internal {
+using std::begin;
+using std::end;
+
+template <class It> using iter_ref_t = decltype(*std::declval<It &>());
+
+template <class Range>
+using range_begin_t = decltype(begin(std::declval<const Range &>()));
+
+template <class Range>
+using range_end_t = decltype(end(std::declval<const Range &>()));
+
+template <class, class = void> struct is_input_iterator : std::false_type {};
+
+template <class It>
+struct is_input_iterator<
+    It, std::void_t<typename std::iterator_traits<It>::iterator_category,
+                    decltype(*std::declval<It &>()),
+                    decltype(++std::declval<It &>()),
+                    decltype(std::declval<It &>() == std::declval<It &>()),
+                    decltype(std::declval<It &>() != std::declval<It &>())>>
+    : std::bool_constant<std::is_base_of_v<
+          std::input_iterator_tag,
+          typename std::iterator_traits<It>::iterator_category>> {};
+
+template <class It>
+inline constexpr bool is_input_iterator_v = is_input_iterator<It>::value;
+
+template <class It, class ToIndex, class = void>
+struct accepts_iter_enabled : std::false_type {};
+
+template <class It, class ToIndex>
+struct accepts_iter_enabled<
+    It, ToIndex,
+    std::void_t<iter_ref_t<It>,
+                std::invoke_result_t<ToIndex &, iter_ref_t<It>>>>
+    : std::bool_constant<
+          is_input_iterator_v<It> &&
+          std::is_invocable_r_v<int, ToIndex &, iter_ref_t<It>>> {};
+
+template <class It, class ToIndex>
+inline constexpr bool accepts_iter_enabled_v =
+    accepts_iter_enabled<It, ToIndex>::value;
+
+template <class Range, class ToIndex, class = void>
+struct accepts_range_enabled : std::false_type {};
+
+template <class Range, class ToIndex>
+struct accepts_range_enabled<
+    Range, ToIndex, std::void_t<range_begin_t<Range>, range_end_t<Range>>>
+    : std::bool_constant<
+          std::is_same_v<range_begin_t<Range>, range_end_t<Range>> &&
+          accepts_iter_enabled_v<range_begin_t<Range>, ToIndex>> {};
+
+template <class Range, class ToIndex>
+inline constexpr bool accepts_range_enabled_v =
+    accepts_range_enabled<Range, ToIndex>::value;
+
+template <class T, class = void>
+struct is_static_castable_to_int : std::false_type {};
+
+template <class T>
+struct is_static_castable_to_int<
+    T, std::void_t<decltype(static_cast<int>(std::declval<T>()))>>
+    : std::true_type {};
+
+template <class T>
+inline constexpr bool is_static_castable_to_int_v =
+    is_static_castable_to_int<T>::value;
+
+struct to_int {
+    template <class T,
+              std::enable_if_t<is_static_castable_to_int_v<T &&>, int> = 0>
+    constexpr int operator()(T &&x) const
+        noexcept(noexcept(static_cast<int>(std::forward<T>(x)))) {
+        return static_cast<int>(std::forward<T>(x));
+    }
+};
+} // namespace internal
+
+class DFA {
+  private:
+    int n;
+    int sigma;
+    int initial_state;
+
+    std::vector<unsigned char> accepting;
+    std::vector<std::vector<int>> trans;
+
+    std::string key;
+
+    // initial_state や trans などが範囲外となることも一応許容する
+
+  public:
+    DFA(const int n, const int sigma, const int initial_state,
+        const std::vector<unsigned char> &accepting,
+        const std::vector<std::vector<int>> &trans, const std::string &key)
+        : n(n), sigma(sigma), initial_state(initial_state),
+          accepting(accepting), trans(trans), key(key) {
+        assert(n >= 0);
+        assert(sigma >= 0);
+
+        assert(static_cast<int>(accepting.size()) >= n);
+        assert(static_cast<int>(trans.size()) >= n);
+        for (int i = 0; i < n; i += 1) {
+            assert(static_cast<int>(trans[i].size()) >= sigma);
+        }
+    }
+
+    template <std::size_t N, std::size_t SIGMA>
+    DFA(const int initial_state, const std::array<unsigned char, N> &acc,
+        const std::array<std::array<int, SIGMA>, N> &tr, const std::string &key)
+        : n(N), sigma(SIGMA), initial_state(initial_state),
+          accepting(acc.begin(), acc.end()), trans(N, std::vector<int>(SIGMA)),
+          key(key) {
+        // acc と tr の要素数は決まっている
+        for (int i = 0; i < N; i += 1) {
+            for (int j = 0; j < SIGMA; j += 1) {
+                trans[i][j] = tr[i][j];
+            }
+        }
+    }
+
+    int state_size() const noexcept { return n; }
+    int alphabet_size() const noexcept { return sigma; }
+    int index_of_initial_state() const noexcept { return initial_state; }
+
+    const std::string &get_key() const & noexcept { return key; }
+
+    bool is_accepting(int src) const {
+        if (src < 0 || src >= n) {
+            return false;
+        }
+        return static_cast<bool>(accepting[src]);
+    }
+
+    int next(int src, int label) const {
+        if (src < 0 || src >= n) {
+            return -1;
+        }
+        if (label < 0 || label >= sigma) {
+            return -1;
+        }
+        return trans[src][label];
+    }
+
+    template <class It, class ToIndex,
+              std::enable_if_t<internal::accepts_iter_enabled_v<It, ToIndex>,
+                               int> = 0>
+    bool accepts(It first, It last, ToIndex to_index) const {
+        int cur = initial_state;
+        for (; first != last; ++first) {
+            if (cur < 0 || cur >= n) {
+                return false;
+            }
+            const int label = std::invoke(to_index, *first);
+            if (label < 0 || label >= sigma) {
+                return false;
+            }
+            cur = trans[cur][label];
+        }
+
+        // is_accepting 関数側でも cur が範囲内であるかどうかはチェックされる
+        return is_accepting(cur);
+    }
+
+    template <
+        class Range, class ToIndex,
+        std::enable_if_t<
+            internal::accepts_range_enabled_v<Range, std::decay_t<ToIndex>> &&
+                std::is_constructible_v<std::decay_t<ToIndex>, ToIndex &&>,
+            int> = 0>
+    bool accepts(const Range &r, ToIndex &&to_index) const {
+        using std::begin;
+        using std::end;
+        using F = std::decay_t<ToIndex>;
+
+        return accepts(begin(r), end(r), F(std::forward<ToIndex>(to_index)));
+    }
+
+    template <
+        class It,
+        std::enable_if_t<internal::accepts_iter_enabled_v<It, internal::to_int>,
+                         int> = 0>
+    bool accepts(It first, It last) const {
+        return accepts(first, last, internal::to_int{});
+    }
+
+    template <class Range, std::enable_if_t<internal::accepts_range_enabled_v<
+                                                Range, internal::to_int>,
+                                            int> = 0>
+    bool accepts(const Range &r) const {
+        return accepts(r, internal::to_int{});
+    }
+};
+
+class DFAs {
+  private:
+    std::vector<DFA> dfas;
+
+  public:
+    const std::vector<DFA> &operator()() const & noexcept { return dfas; }
+
+    int index_of(const std::string &key) const {
+        auto it = std::find_if(
+            dfas.begin(), dfas.end(),
+            [&key](const DFA &dfa) -> bool { return dfa.get_key() == key; });
+        if (it != dfas.end()) {
+            return static_cast<int>(it - dfas.begin());
+        } else {
+            return -1;
+        }
+    }
+
+    const DFA &get(const std::string &key) const & {
+        int i = index_of(key);
+        if (i < 0) {
+            std::abort();
+        }
+        return dfas[i];
+    }
+
+    template <std::size_t N, std::size_t SIGMA>
+    void register_dfa(const int initial_state,
+                      const std::array<unsigned char, N> &acc,
+                      const std::array<std::array<int, SIGMA>, N> &tr,
+                      const std::string &key) {
+        DFA dfa(initial_state, acc, tr, key);
+
+        int i = index_of(key);
+        if (i >= 0) {
+            std::abort(); // already exists
+        }
+        dfas.emplace_back(dfa);
+    }
+};
+
+inline DFAs &dfas() {
+    static DFAs dfas;
+    return dfas;
+}\
+""")
     res.append(f"}} // namespace {namespace}")
     res.append("")
 
