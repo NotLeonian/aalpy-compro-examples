@@ -146,12 +146,16 @@ class DFA {
         }
     }
 
+    // 状態数
     int state_size() const noexcept { return n; }
+    // アルファベット（文字集合）の要素数
     int alphabet_size() const noexcept { return sigma; }
+    // 初期状態のインデックス
     int index_of_initial_state() const noexcept { return initial_state; }
 
     const std::string &get_key() const & noexcept { return key; }
 
+    // src が受理状態かどうか
     bool is_accepting(int src) const {
         if (src < 0 || src >= n) {
             return false;
@@ -159,6 +163,8 @@ class DFA {
         return static_cast<bool>(accepting[src]);
     }
 
+    // ラベルが label である文字が入力されたとき
+    // src からどの状態に遷移するか
     int next(int src, int label) const {
         if (src < 0 || src >= n) {
             return -1;
@@ -169,6 +175,9 @@ class DFA {
         return trans[src][label];
     }
 
+    // その文字列が受理されるかどうか
+    //
+    // to_index: 各文字をラベルに変換する関数
     template <class It, class ToIndex,
               std::enable_if_t<internal::accepts_iter_enabled_v<It, ToIndex>,
                                int> = 0>
@@ -189,6 +198,9 @@ class DFA {
         return is_accepting(cur);
     }
 
+    // その文字列が受理されるかどうか
+    //
+    // to_index: 各文字をラベルに変換する関数
     template <
         class Range, class ToIndex,
         std::enable_if_t<
@@ -203,6 +215,7 @@ class DFA {
         return accepts(begin(r), end(r), F(std::forward<ToIndex>(to_index)));
     }
 
+    // その文字列が受理されるかどうか
     template <
         class It,
         std::enable_if_t<internal::accepts_iter_enabled_v<It, internal::to_int>,
@@ -211,6 +224,7 @@ class DFA {
         return accepts(first, last, internal::to_int{});
     }
 
+    // その文字列が受理されるかどうか
     template <class Range, std::enable_if_t<internal::accepts_range_enabled_v<
                                                 Range, internal::to_int>,
                                             int> = 0>
@@ -226,6 +240,9 @@ class DFAs {
   public:
     const std::vector<DFA> &operator()() const & noexcept { return dfas; }
 
+    // キーが key である DFA のインデックスを返す
+    //
+    // 存在しなければ -1 を返す
     int index_of(const std::string &key) const {
         auto it = std::find_if(
             dfas.begin(), dfas.end(),
@@ -237,6 +254,9 @@ class DFAs {
         }
     }
 
+    // キーが key である DFA を返す
+    //
+    // 存在しなければ abort することに注意
     const DFA &get(const std::string &key) const & {
         int i = index_of(key);
         if (i < 0) {
@@ -245,6 +265,9 @@ class DFAs {
         return dfas[i];
     }
 
+    // DFA を登録する
+    //
+    // 既に同じキーの DFA が存在すれば abort することに注意
     template <std::size_t N, std::size_t SIGMA>
     void register_dfa(const int initial_state,
                       const std::array<unsigned char, N> &acc,
