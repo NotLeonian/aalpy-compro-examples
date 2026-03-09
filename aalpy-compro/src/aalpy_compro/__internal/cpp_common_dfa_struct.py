@@ -281,8 +281,10 @@ class DFA {
             dp_table.swap(next_table);
 
             for (int i = 0; i < n; i += 1) {
-                if (is_accepting(i) && ans < dp_table[i]) {
-                    ans = dp_table[i];
+                if (is_accepting(i)) {
+                    if (ans < dp_table[i]) {
+                        ans = dp_table[i];
+                    }
                 }
             }
         }
