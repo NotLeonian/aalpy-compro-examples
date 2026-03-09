@@ -165,6 +165,10 @@ class DFA {
 
     // ラベルが label である文字が入力されたとき
     // src からどの状態に遷移するか
+    //
+    // src や label が範囲外である場合は -1 を返す
+    //
+    // -1 などの負の数の返り値が、省略された dead 状態 (sink) を表す可能性がある
     int next(int src, int label) const {
         if (src < 0 || src >= n) {
             return -1;
