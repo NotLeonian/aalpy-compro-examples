@@ -24,23 +24,16 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     res.append(f"namespace {namespace} {{")
     res.append("""\
 namespace internal {
-template <class Range> decltype(auto) adl_begin(Range &&r) {
-    using std::begin;
-    return begin(std::forward<Range>(r));
-}
-
-template <class Range> decltype(auto) adl_end(Range &&r) {
-    using std::end;
-    return end(std::forward<Range>(r));
-}
+using std::begin;
+using std::end;
 
 template <class It> using iter_ref_t = decltype(*std::declval<It &>());
 
 template <class Range>
-using range_begin_t = decltype(adl_begin(std::declval<const Range &>()));
+using range_begin_t = decltype(begin(std::declval<const Range &>()));
 
 template <class Range>
-using range_end_t = decltype(adl_end(std::declval<const Range &>()));
+using range_end_t = decltype(end(std::declval<const Range &>()));
 
 template <class, class = void> struct is_input_iterator : std::false_type {};
 
@@ -203,9 +196,11 @@ class DFA {
                 std::is_constructible_v<std::decay_t<ToIndex>, ToIndex &&>,
             int> = 0>
     bool accepts(const Range &r, ToIndex &&to_index) const {
+        using std::begin;
+        using std::end;
         using F = std::decay_t<ToIndex>;
-        return accepts(internal::adl_begin(r), internal::adl_end(r),
-                       F(std::forward<ToIndex>(to_index)));
+
+        return accepts(begin(r), end(r), F(std::forward<ToIndex>(to_index)));
     }
 
     template <
