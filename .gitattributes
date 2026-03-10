@@ -33,6 +33,10 @@ CMakeLists.txt text eol=lf
 *.cmd  text eol=crlf
 *.ps1  text eol=crlf
 
+# template files
+*.tmpl    text
+*.py.tmpl text eol=lf diff=python
+
 # Python / C++ generated files
 *.pyc   binary
 *.pyo   binary
