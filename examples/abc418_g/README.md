@@ -42,7 +42,7 @@
 C++ の記述の順序の関係から、必ず `write(learn_args(key=key, property_path=property_path))` よりも先に `write(common_args())` が呼び出されるようにすること。
 
 ### 学習の実行
-shebang を書いているので、bash や zsh であればそのまま `./run.py` でよい。  
+shebang を書いているので、bash や zsh などであればそのまま `./run.py` でよい。  
 そうでない環境では、`uv run run.py` を推奨する。
 
 [learned_dfa.cpp](./learned_dfa.cpp) が生成される。
