@@ -58,7 +58,7 @@ aalpy-compro は ABC418-G で使用できる `longest_accepted_substring_length`
 learned_dfa.cpp に main 関数などを追加したのが [refined_solution.cpp](./refined_solution.cpp) である。
 
 > [!NOTE]
-> learned_dfa.cpp と比較すると、インクルードされているヘッダが増えていたり、clang-format によるフォーマットで微妙に改行位置などが異なっていたりするが、重要ではない。
+> refined_solution.cpp では、learned_dfa.cpp に `to_index` 関数と `main` 関数を追加するだけでなく、`iostream` のインクルードや clang-format によるフォーマットも行っている。
 
 ### コンパイル・実行
 GCC の場合、以下のようなコンパイルコマンドを想定している。
