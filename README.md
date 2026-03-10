@@ -4,6 +4,12 @@ Examples of solving competitive programming problems with automata learning usin
 ## これは？
 能動オートマトン学習を用いて解ける競技プログラミングの問題について、AALpy の学習結果を C++ のソースコードに変換するツール **aalpy-compro** とその使用例を公開するリポジトリです。
 
+なお、aalpy-compro はコンテスト中であってもある程度使いやすいように設計しているつもりです。
+
+> [!CAUTION]
+> **aalpy-compro をコンテスト中に使用しようとする場合は、使用したいコンテストのルールを事前に確認してください。**  
+> また、AALpy は「AtCoder生成AI対策ルール - 20251003版」([ja](https://info.atcoder.jp/entry/llm-rules-ja) / [en](https://info.atcoder.jp/entry/llm-rules-en)) などで定義されている「生成 AI」にはあたらないとリポジトリの作成者 (@NotLeonian) は考えていますが、**コンテスト中に使用したい場合はそのコンテストの生成 AI に関するルールを事前に確認するとともに、能動オートマトン学習および AALpy について事前に知っておくことを推奨します。**
+
 ## 推奨環境
 ### aalpy-compro および examples
 uv が使える環境を推奨します。
