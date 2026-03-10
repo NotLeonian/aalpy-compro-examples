@@ -426,8 +426,8 @@ class DFA {
         using std::end;
         using F = std::decay_t<ToIndex>;
 
-        return count_accepted_substrings(begin(r), end(r),
-                                         F(std::forward<ToIndex>(to_index)));
+        return count_accepted_substrings<R>(begin(r), end(r),
+                                            F(std::forward<ToIndex>(to_index)));
     }
 
     // 空でない部分文字列のうち、受理されるものの個数
@@ -441,7 +441,7 @@ class DFA {
                       internal::count_accumulator_enabled_v<R>,
                   int> = 0>
     R count_accepted_substrings(It first, It last) const {
-        return count_accepted_substrings(first, last, internal::to_int{});
+        return count_accepted_substrings<R>(first, last, internal::to_int{});
     }
 
     // 空でない部分文字列のうち、受理されるものの個数
@@ -455,7 +455,7 @@ class DFA {
                       internal::count_accumulator_enabled_v<R>,
                   int> = 0>
     R count_accepted_substrings(const Range &r) const {
-        return count_accepted_substrings(r, internal::to_int{});
+        return count_accepted_substrings<R>(r, internal::to_int{});
     }
 };
 
