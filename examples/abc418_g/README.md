@@ -8,9 +8,9 @@
 ### 素朴な accepts 判定関数の記述
 [property.py.tmpl](./property.py.tmpl) に `alphabet` と `accepts` 関数を Python で記述する。
 
-[!NOTE]
-適切に `accepts` 関数が実装されていれば、`alphabet` の中身は重要ではない。  
-たとえば、`[0, 1]` の代わりに `["0", "1"]` と書いても、`accepts` 関数の実装で吸収させることができる。
+> [!NOTE]
+> 適切に `accepts` 関数が実装されていれば、`alphabet` の中身は重要ではない。  
+> たとえば、`[0, 1]` の代わりに `["0", "1"]` と書いても、`accepts` 関数の実装で吸収させることができる。
 
 `accepts` 関数は CYK 法で実装している。  
 ローカルで実行するためのものであるから、ジャッジ環境に入っているライブラリにこだわらなくてもよい。
@@ -35,9 +35,9 @@
 
 また、`learn_args` 関数内の `["--max-states", str(7)]` の `7` は DFA の状態数の上界であり、適切に設定する必要がある。
 
-[!NOTE]
-デフォルトの設定で学習が上手くいかなければ `learn_args` 関数内の `["--oracle", "wp"]` を、`"random_wp"` または `"state_prefix"` に変更することも手である。  
-ただし、その場合は他のオプションも適切に追加・変更・削除する必要がある（上級者向け）。
+> [!NOTE]
+>デフォルトの設定で学習が上手くいかなければ `learn_args` 関数内の `["--oracle", "wp"]` を、`"random_wp"` または `"state_prefix"` に変更することも手である。  
+> ただし、その場合は他のオプションも適切に追加・変更・削除する必要がある（上級者向け）。
 
 C++ の記述の順序の関係から、必ず `write(learn_args(key=key, property_path=property_path))` よりも先に `write(common_args())` が呼び出されるようにすること。
 
@@ -57,8 +57,8 @@ aalpy-compro は ABC418-G で使用できる `longest_accepted_substring_length`
 
 learned_dfa.cpp に main 関数などを追加したのが [refined_solution.cpp](./refined_solution.cpp) である。
 
-[!NOTE]
-learned_dfa.cpp と比較すると、インクルードされているヘッダが増えていたり、clang-format によるフォーマットで微妙に改行位置などが異なっていたりするが、重要ではない。
+> [!NOTE]
+> learned_dfa.cpp と比較すると、インクルードされているヘッダが増えていたり、clang-format によるフォーマットで微妙に改行位置などが異なっていたりするが、重要ではない。
 
 ### コンパイル・実行
 GCC の場合、以下のようなコンパイルコマンドを想定している。
