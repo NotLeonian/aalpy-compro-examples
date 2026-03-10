@@ -24,6 +24,11 @@ aalpy-compro は C++ のソースコードの一部を出力します。
 
 uv の設定によっては、`uv python install` 等の他のコマンドの実行も必要になるかもしれません。
 
+> [!NOTE]
+> 現在、aalpy-compro は hatchling と hatch-vcs を用いてバージョン管理をしており、aalpy-compro-examples ではワークスペースの aalpy-compro をインストールするように uv 側で設定しています。  
+> aalpy-compro のバージョンが上がった後、`uv sync` の再実行などではバージョンが上がらない事象を確認しています。  
+> もしバージョンが上がらなければ、`uv sync --reinstall-package aalpy-compro` も試してみてください。
+
 ## 使用方法について
 `examples/` 内のソースコードおよびドキュメントを参考にしてください。
 
