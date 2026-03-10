@@ -2,7 +2,7 @@
 Examples of solving competitive programming problems with automata learning using AALpy
 
 ## これは？
-能動オートマトン学習を用いて解ける競技プログラミングの問題について、AALpy の学習結果を C++ のソースコードに変換する `aalpy-compro` とその使用例を公開するリポジトリです。
+能動オートマトン学習を用いて解ける競技プログラミングの問題について、AALpy の学習結果を C++ のソースコードに変換するツール **aalpy-compro** とその使用例を公開するリポジトリです。
 
 ## 推奨環境
 ### aalpy-compro および examples
