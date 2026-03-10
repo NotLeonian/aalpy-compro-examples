@@ -101,6 +101,20 @@ struct to_int {
         return static_cast<int>(std::forward<T>(x));
     }
 };
+
+template <class R, class = void>
+struct count_accumulator_enabled : std::false_type {};
+
+template <class R>
+struct count_accumulator_enabled<
+    R, std::void_t<decltype(std::declval<R &>() += std::declval<const R &>())>>
+    : std::bool_constant<std::is_constructible_v<R, int> &&
+                         std::is_copy_constructible_v<R> &&
+                         std::is_assignable_v<R &, const R &>> {};
+
+template <class R>
+inline constexpr bool count_accumulator_enabled_v =
+    count_accumulator_enabled<R>::value;
 } // namespace internal
 
 class DFA {
@@ -339,6 +353,109 @@ class DFA {
                                             int> = 0>
     int longest_accepted_substring_length(const Range &r) const {
         return longest_accepted_substring_length(r, internal::to_int{});
+    }
+
+    // 空でない部分文字列のうち、受理されるものの個数
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    //
+    // 返り値の型は atcoder::modint998244353 などにもできる
+    //
+    // to_index: 各文字をラベルに変換する関数
+    template <class R = long long, class It, class ToIndex,
+              std::enable_if_t<internal::accepts_iter_enabled_v<It, ToIndex> &&
+                                   internal::count_accumulator_enabled_v<R>,
+                               int> = 0>
+    R count_accepted_substrings(It first, It last, ToIndex to_index) const {
+        const R zero(0);
+        const R one(1);
+
+        R ans = zero;
+        std::vector<R> dp_table(n, zero), next_table(n, zero);
+
+        for (; first != last; ++first) {
+            const int label = std::invoke(to_index, *first);
+            std::fill(next_table.begin(), next_table.end(), zero);
+
+            if (label >= 0 && label < sigma) {
+                {
+                    // 長さ 1
+                    int next_state = next(initial_state, label);
+                    if (next_state >= 0 && next_state < n) {
+                        next_table[next_state] += one;
+                    }
+                }
+
+                for (int i = 0; i < n; i += 1) {
+                    // 長さ 2 以上
+                    int next_state = next(i, label);
+                    if (next_state >= 0 && next_state < n) {
+                        next_table[next_state] += dp_table[i];
+                    }
+                }
+            }
+
+            dp_table.swap(next_table);
+
+            for (int i = 0; i < n; i += 1) {
+                if (is_accepting(i)) {
+                    ans += dp_table[i];
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    // 空でない部分文字列のうち、受理されるものの個数
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    //
+    // 返り値の型は atcoder::modint998244353 などにもできる
+    //
+    // to_index: 各文字をラベルに変換する関数
+    template <
+        class R = long long, class Range, class ToIndex,
+        std::enable_if_t<
+            internal::accepts_range_enabled_v<Range, std::decay_t<ToIndex>> &&
+                std::is_constructible_v<std::decay_t<ToIndex>, ToIndex &&> &&
+                internal::count_accumulator_enabled_v<R>,
+            int> = 0>
+    R count_accepted_substrings(const Range &r, ToIndex &&to_index) const {
+        using std::begin;
+        using std::end;
+        using F = std::decay_t<ToIndex>;
+
+        return count_accepted_substrings(begin(r), end(r),
+                                         F(std::forward<ToIndex>(to_index)));
+    }
+
+    // 空でない部分文字列のうち、受理されるものの個数
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    //
+    // 返り値の型は atcoder::modint998244353 などにもできる
+    template <class R = long long, class It,
+              std::enable_if_t<
+                  internal::accepts_iter_enabled_v<It, internal::to_int> &&
+                      internal::count_accumulator_enabled_v<R>,
+                  int> = 0>
+    R count_accepted_substrings(It first, It last) const {
+        return count_accepted_substrings(first, last, internal::to_int{});
+    }
+
+    // 空でない部分文字列のうち、受理されるものの個数
+    //
+    // 空文字列も含んで考えたい場合も、空文字列が受理されるかどうかを別で求めればよい
+    //
+    // 返り値の型は atcoder::modint998244353 などにもできる
+    template <class R = long long, class Range,
+              std::enable_if_t<
+                  internal::accepts_range_enabled_v<Range, internal::to_int> &&
+                      internal::count_accumulator_enabled_v<R>,
+                  int> = 0>
+    R count_accepted_substrings(const Range &r) const {
+        return count_accepted_substrings(r, internal::to_int{});
     }
 };
 
