@@ -3,8 +3,6 @@ def common_dfa_struct(*, namespace: str = "learned_dfa") -> str:
     DFA の構造体の C++ のソースコードを返す
     """
 
-    # TODO: DFA のメソッドを実装する
-
     res: list[str] = []
     for header_name in [
         "algorithm",
