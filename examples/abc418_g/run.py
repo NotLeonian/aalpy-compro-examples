@@ -61,7 +61,7 @@ with open(output_path, "w", encoding="utf-8") as f:
 
     def write(args: list[str]) -> None:
         subprocess.run(
-            [sys.executable, "-u", "-m", "aalpy_compro.main"] + args,
+            [sys.executable, "-u", "-m", "aalpy_compro"] + args,
             cwd=script_dir,
             stdin=subprocess.DEVNULL,
             stdout=f,

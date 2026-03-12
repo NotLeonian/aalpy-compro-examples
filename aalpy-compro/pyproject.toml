@@ -12,6 +12,9 @@ dependencies = [
     "aalpy>=1.5.3",
 ]
 
+[project.scripts]
+aalpy-compro = "aalpy_compro.main:main"
+
 [tool.hatch.version]
 source = "vcs"
 tag-pattern = "^aalpy-compro-v(?P<version>.*)$"

@@ -18,7 +18,7 @@ from .__internal.fullmatch import validate_fullmatch_pattern
 from .__internal.main_args import MainArgs
 
 
-def main() -> None:
+def main() -> int:
     """
     path で受け取った alphabet や accepts の実装をもとに
     オートマトン学習を行い、cpp ファイルを出力する
@@ -165,6 +165,8 @@ def main() -> None:
         res = common_dfa_struct(namespace=args.namespace)
 
         print(res)
+
+    return 0
 
 
 if __name__ == "__main__":
