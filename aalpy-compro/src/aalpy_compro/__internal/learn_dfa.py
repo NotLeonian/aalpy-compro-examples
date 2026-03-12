@@ -6,7 +6,7 @@ from aalpy.automata import Dfa
 from aalpy.learning_algs import run_KV
 
 from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
-from .sul import PrefixAcceptingSUL
+from .prefix_accepting_sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
 KVCexProcessingList: list[str] = [
