@@ -2,6 +2,8 @@ from collections.abc import Callable
 import argparse
 import re
 
+from .__internal.names import DIST_NAME
+from .__internal.get_version import get_version
 from .__internal.eq_oracles import (
     WpSpec,
     RandomWpSpec,
@@ -45,6 +47,13 @@ def main() -> int:
         return __validator
 
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"{DIST_NAME} {get_version()}",
+    )
 
     parser.add_argument(
         "--kind",
