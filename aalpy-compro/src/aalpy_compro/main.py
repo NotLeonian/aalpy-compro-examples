@@ -127,10 +127,12 @@ def main() -> int:
 
         property = load_property(args.path)
 
+        oracle_spec: EqOracleSpec
+
         if args.oracle == "wp":
             if args.max_states is None:
                 raise SystemExit("--oracle wp requires --max-states.")
-            oracle_spec: EqOracleSpec = WpSpec(max_states=args.max_states)
+            oracle_spec = WpSpec(max_states=args.max_states)
         elif args.oracle == "random_wp":
             oracle_spec = RandomWpSpec(
                 min_length=args.min_length,
