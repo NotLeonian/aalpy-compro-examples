@@ -157,6 +157,7 @@ def main() -> int:
             accepts=property.accepts,
             oracle_spec=oracle_spec,
             learn_config=learn_config,
+            fixed_eq_word_factory=property.fixed_eq_word_factory,
         )
 
         assert args.key is not None  # MainArgs の __post_init__ で弾かれている
