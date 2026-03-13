@@ -1,6 +1,7 @@
 from collections.abc import Callable
 import argparse
 import re
+import sys
 
 from .__internal.names import DIST_NAME
 from .__internal.get_version import get_version
@@ -141,6 +142,9 @@ def main() -> int:
                 "--oracle, `eq_words`/`iter_eq_words`, or "
                 "`state_extension_words`/`iter_state_extension_words`."
             )
+
+        if args.oracle is None and args.base_oracle_options_are_non_default():
+            print("Warning: base-oracle-specific options require --oracle.", file=sys.stderr)
 
         oracle_spec: EqOracleSpec | None
 
