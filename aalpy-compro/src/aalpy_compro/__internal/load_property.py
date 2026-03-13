@@ -8,14 +8,6 @@ T = TypeVar("T")
 WordFactory: TypeAlias = Callable[[], Iterable[tuple[T, ...]]]
 
 
-@dataclass(frozen=True)
-class LearningProperty(Generic[T]):
-    alphabet: Sequence[T]
-    accepts: Callable[[tuple[T, ...]], bool]
-    symbol_to_label: Callable[[T], str] = str
-    fixed_eq_word_factory: WordFactory[T] | None = None
-
-
 def iter_words(
     raw: Iterable[Iterable[T]],
     *,
@@ -91,6 +83,14 @@ def load_word_factory(
         return factory_with_iter_words
 
     return None
+
+
+@dataclass(frozen=True)
+class LearningProperty(Generic[T]):
+    alphabet: Sequence[T]
+    accepts: Callable[[tuple[T, ...]], bool]
+    symbol_to_label: Callable[[T], str] = str
+    fixed_eq_word_factory: WordFactory[T] | None = None
 
 
 def load_property(path: str) -> LearningProperty[object]:
