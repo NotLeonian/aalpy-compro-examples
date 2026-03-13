@@ -136,3 +136,6 @@ def load_property(path: str) -> LearningProperty[object]:
         symbol_to_label=symbol_to_label,
         fixed_eq_word_factory=fixed_eq_word_factory,
     )
+
+
+CustomEqOracleFactoryAttrs: list[str] = ["fixed_eq_word_factory"]

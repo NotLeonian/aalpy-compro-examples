@@ -36,7 +36,7 @@ def learn_dfa_KV(
     *,
     alphabet: Sequence[T],
     accepts: Callable[[tuple[T, ...]], bool],
-    oracle_spec: EqOracleSpec,
+    oracle_spec: EqOracleSpec | None,
     learn_config: LearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:

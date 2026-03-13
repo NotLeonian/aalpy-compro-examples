@@ -84,12 +84,21 @@ def build_base_eq_oracle(
 def build_eq_oracle(
     alphabet: Sequence[T],
     sul: SUL,
-    spec: EqOracleSpec,
+    spec: EqOracleSpec | None,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> EqOracle:
-    base_oracle = build_base_eq_oracle(alphabet, sul, spec)
-    if fixed_eq_word_factory is None:
-        return base_oracle
+    oracles: list[Oracle] = []
 
-    fixed_oracle = FixedWordsEqOracle(alphabet, sul, fixed_eq_word_factory)
-    return ChainedEqOracle(list(alphabet), sul, [fixed_oracle, base_oracle])
+    if fixed_eq_word_factory is not None:
+        oracles.append(FixedWordsEqOracle(alphabet, sul, fixed_eq_word_factory))
+
+    if spec is not None:
+        oracles.append(build_base_eq_oracle(alphabet, sul, spec))
+
+    if not oracles:
+        raise ValueError("At least one equivalence oracle must be configured.")
+
+    if len(oracles) == 1:
+        return oracles[0]
+
+    return ChainedEqOracle(list(alphabet), sul, oracles)
