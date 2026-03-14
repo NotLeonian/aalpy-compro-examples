@@ -18,7 +18,11 @@ KVCexProcessingList: list[str] = [
     "exponential_bwd",
 ]
 KVCexProcessingLiteral: TypeAlias = Literal[
-    "rs", "linear_fwd", "linear_bwd", "exponential_fwd", "exponential_bwd"
+    "rs",
+    "linear_fwd",
+    "linear_bwd",
+    "exponential_fwd",
+    "exponential_bwd",
 ]
 
 T = TypeVar("T")
