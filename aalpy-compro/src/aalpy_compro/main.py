@@ -13,7 +13,17 @@ from .__internal.eq_oracles import (
     EqOracleList,
     EqOracleSpec,
 )
-from .__internal.learn_dfa import KVCexProcessingList, LearnConfig, learn_dfa_KV
+from .__internal.learn_dfa import (
+    CliCexProcessingList,
+    KVLearnConfig,
+    LearnAlgorithmList,
+    LearnConfigSpec,
+    LStarClosingStrategyList,
+    LStarLearnConfig,
+    learn_dfa,
+    normalize_lstar_cex_processing,
+    normalize_kv_cex_processing,
+)
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
@@ -76,15 +86,28 @@ def main() -> int:
             "`eq_words`/`iter_eq_words`."
         ),
     )
+
+    parser.add_argument(
+        "--algorithm",
+        choices=LearnAlgorithmList,
+        default="kv",
+    )
+
     parser.add_argument(
         "--namespace",
-        type=parse_fullmatch_pattern(pattern=NAMESPACE_PATTERN, arg_name="namespace"),
+        type=parse_fullmatch_pattern(
+            pattern=NAMESPACE_PATTERN,
+            arg_name="namespace",
+        ),
         help=f"--namespace must match /{NAMESPACE_PATTERN.pattern}/.",
         default="learned_dfa",
     )
     parser.add_argument(
         "--key",
-        type=parse_fullmatch_pattern(pattern=KEY_PATTERN, arg_name="key"),
+        type=parse_fullmatch_pattern(
+            pattern=KEY_PATTERN,
+            arg_name="key",
+        ),
         help="\n".join(
             [
                 f"--key must match /{KEY_PATTERN.pattern}/.",
@@ -95,15 +118,40 @@ def main() -> int:
         default=None,
     )
 
-    # KV params
+    # learning params
     parser.add_argument(
         "--cex-processing",
-        choices=KVCexProcessingList,
+        choices=CliCexProcessingList,
         default="rs",
     )
     parser.add_argument("--max-rounds", type=int, default=None)
     parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--print-level", type=int, default=2)
+
+    # L* params
+    parser.add_argument(
+        "--closing-strategy",
+        choices=LStarClosingStrategyList,
+        default="shortest_first",
+    )
+    parser.add_argument(
+        "--e-set-suffix-closed",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-e-set-suffix-closed",
+        dest="e_set_suffix_closed",
+        action="store_false",
+    )
+    parser.add_argument(
+        "--all-prefixes-in-obs-table",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-all-prefixes-in-obs-table",
+        dest="all_prefixes_in_obs_table",
+        action="store_false",
+    )
 
     # Wp params
     # max-states には default の値を設定していないことに注意
@@ -119,8 +167,17 @@ def main() -> int:
     parser.add_argument("--walk-len", type=int, default=12)
     parser.add_argument("--max-tests", type=int, default=None)
     parser.add_argument("--depth-first", action="store_true")
-    parser.add_argument("--no-depth-first", dest="depth_first", action="store_false")
-    parser.set_defaults(depth_first=True)
+    parser.add_argument(
+        "--no-depth-first",
+        dest="depth_first",
+        action="store_false",
+    )
+
+    parser.set_defaults(
+        depth_first=True,
+        e_set_suffix_closed=False,
+        all_prefixes_in_obs_table=True,
+    )
 
     args = MainArgs(**vars(parser.parse_args()))
 
@@ -169,14 +226,40 @@ def main() -> int:
                 depth_first=args.depth_first,
             )
 
-        learn_config = LearnConfig(
-            cex_processing=args.cex_processing,
-            max_learning_rounds=args.max_rounds,
-            cache_and_non_det_check=(not args.no_cache),
-            print_level=args.print_level,
-        )
+        learn_config: LearnConfigSpec
 
-        dfa = learn_dfa_KV(
+        if args.algorithm == "lstar":
+            learn_config = LStarLearnConfig(
+                cex_processing=normalize_lstar_cex_processing(args.cex_processing),
+                closing_strategy=args.closing_strategy,
+                e_set_suffix_closed=args.e_set_suffix_closed,
+                all_prefixes_in_obs_table=args.all_prefixes_in_obs_table,
+                max_learning_rounds=args.max_rounds,
+                cache_and_non_det_check=(not args.no_cache),
+                print_level=args.print_level,
+            )
+        else:
+            if args.closing_strategy != "shortest_first":
+                raise SystemExit(
+                    "--closing-strategy is only valid with --algorithm lstar."
+                )
+            if args.e_set_suffix_closed:
+                raise SystemExit(
+                    "--e-set-suffix-closed is only valid with --algorithm lstar."
+                )
+            if not args.all_prefixes_in_obs_table:
+                raise SystemExit(
+                    "--no-all-prefixes-in-obs-table is only valid with --algorithm lstar."
+                )
+
+            learn_config = KVLearnConfig(
+                cex_processing=normalize_kv_cex_processing(args.cex_processing),
+                max_learning_rounds=args.max_rounds,
+                cache_and_non_det_check=(not args.no_cache),
+                print_level=args.print_level,
+            )
+
+        dfa = learn_dfa(
             alphabet=property.alphabet,
             accepts=property.accepts,
             oracle_spec=oracle_spec,
@@ -196,9 +279,7 @@ def main() -> int:
 
         print(res)
     else:
-        res = common_dfa_struct(namespace=args.namespace)
-
-        print(res)
+        print(common_dfa_struct(namespace=args.namespace))
 
     return 0
 
