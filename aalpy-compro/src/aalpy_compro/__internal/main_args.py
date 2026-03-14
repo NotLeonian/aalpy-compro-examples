@@ -79,6 +79,11 @@ class MainArgs:
             )
 
     def base_oracle_options_are_non_default(self) -> bool:
+        """
+        base oracle に関するオプションについて
+        default 値以外を指定しているかどうかを判定する関数
+        """
+
         return (
             self.max_states is not None
             or self.min_length != 1
