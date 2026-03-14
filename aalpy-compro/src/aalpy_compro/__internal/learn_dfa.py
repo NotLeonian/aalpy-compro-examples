@@ -6,6 +6,7 @@ from aalpy.automata import Dfa
 from aalpy.learning_algs import run_KV
 
 from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
+from .load_property import WordFactory
 from .prefix_accepting_sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
@@ -35,11 +36,17 @@ def learn_dfa_KV(
     *,
     alphabet: Sequence[T],
     accepts: Callable[[tuple[T, ...]], bool],
-    oracle_spec: EqOracleSpec,
+    oracle_spec: EqOracleSpec | None,
     learn_config: LearnConfig,
+    fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
     sul = PrefixAcceptingSUL(accepts)
-    eq_oracle = build_eq_oracle(alphabet, sul, oracle_spec)
+    eq_oracle = build_eq_oracle(
+        alphabet,
+        sul,
+        oracle_spec,
+        fixed_eq_word_factory=fixed_eq_word_factory,
+    )
 
     dfa = run_KV(
         list(alphabet),

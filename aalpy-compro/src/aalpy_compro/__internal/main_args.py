@@ -57,3 +57,15 @@ class MainArgs:
             raise_value_error_if_non_fullmatch(
                 pattern=KEY_PATTERN, string=self.key, var_name="key"
             )
+
+    def base_oracle_options_are_non_default(self) -> bool:
+        return (
+            self.max_states is not None
+            or self.min_length != 1
+            or self.expected_length != 10
+            or self.num_tests != 1000
+            or self.walks_per_state != 25
+            or self.walk_len != 12
+            or self.max_tests is not None
+            or self.depth_first is not True
+        )

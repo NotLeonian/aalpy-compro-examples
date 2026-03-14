@@ -1,9 +1,11 @@
 from collections.abc import Callable
 import argparse
 import re
+import sys
 
 from .__internal.names import DIST_NAME
 from .__internal.get_version import get_version
+from .__internal.load_property import CustomEqOracleFactoryAttrs, load_property
 from .__internal.eq_oracles import (
     WpSpec,
     RandomWpSpec,
@@ -14,7 +16,6 @@ from .__internal.eq_oracles import (
 from .__internal.learn_dfa import KVCexProcessingList, LearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
-from .__internal.load_property import load_property
 from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
 from .__internal.fullmatch import validate_fullmatch_pattern
 from .__internal.main_args import MainArgs
@@ -70,6 +71,10 @@ def main() -> int:
         "--oracle",
         choices=EqOracleList,
         default=None,
+        help=(
+            "Base equivalence oracle. Optional when the property defines "
+            "`eq_words`/`iter_eq_words`."
+        ),
     )
     parser.add_argument(
         "--namespace",
@@ -122,15 +127,34 @@ def main() -> int:
     if args.kind == "learn":
         if args.path is None:
             raise SystemExit("--kind learn requires --path.")
-        if args.oracle is None:
-            raise SystemExit("--kind learn requires --oracle.")
 
         property = load_property(args.path)
 
-        if args.oracle == "wp":
+        has_custom_eq_oracle = any(
+            getattr(property, attr_name, None) is not None
+            for attr_name in CustomEqOracleFactoryAttrs
+        )
+
+        if args.oracle is None and not has_custom_eq_oracle:
+            raise SystemExit(
+                "--kind learn requires at least one equivalence oracle source: "
+                "--oracle, `eq_words`/`iter_eq_words`."
+            )
+
+        if args.oracle is None and args.base_oracle_options_are_non_default():
+            print(
+                "Warning: base-oracle-specific options require --oracle.",
+                file=sys.stderr,
+            )
+
+        oracle_spec: EqOracleSpec | None
+
+        if args.oracle is None:
+            oracle_spec = None
+        elif args.oracle == "wp":
             if args.max_states is None:
                 raise SystemExit("--oracle wp requires --max-states.")
-            oracle_spec: EqOracleSpec = WpSpec(max_states=args.max_states)
+            oracle_spec = WpSpec(max_states=args.max_states)
         elif args.oracle == "random_wp":
             oracle_spec = RandomWpSpec(
                 min_length=args.min_length,
@@ -157,6 +181,7 @@ def main() -> int:
             accepts=property.accepts,
             oracle_spec=oracle_spec,
             learn_config=learn_config,
+            fixed_eq_word_factory=property.fixed_eq_word_factory,
         )
 
         assert args.key is not None  # MainArgs の __post_init__ で弾かれている

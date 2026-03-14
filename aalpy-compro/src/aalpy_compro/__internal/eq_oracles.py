@@ -2,10 +2,13 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Literal, TypeAlias, TypeVar
 
-from aalpy.base import SUL
+from aalpy.base import Oracle, SUL
 from aalpy.oracles import WpMethodEqOracle, RandomWpMethodEqOracle, StatePrefixEqOracle
 
-EqOracle: TypeAlias = WpMethodEqOracle | RandomWpMethodEqOracle | StatePrefixEqOracle
+from .load_property import WordFactory
+from .custom_eq_oracles import ChainedEqOracle, FixedWordsEqOracle
+
+EqOracle: TypeAlias = Oracle
 EqOracleList: list[str] = ["wp", "random_wp", "state_prefix"]
 EqOracleLiteral: TypeAlias = Literal["wp", "random_wp", "state_prefix"]
 
@@ -38,7 +41,7 @@ class StatePrefixSpec:
 EqOracleSpec: TypeAlias = WpSpec | RandomWpSpec | StatePrefixSpec
 
 
-def build_eq_oracle(
+def build_base_eq_oracle(
     alphabet: Sequence[T],
     sul: SUL,
     spec: EqOracleSpec,
@@ -76,3 +79,26 @@ def build_eq_oracle(
         )
 
     raise ValueError(f"Unknown spec.kind: {getattr(spec, 'kind', None)}")
+
+
+def build_eq_oracle(
+    alphabet: Sequence[T],
+    sul: SUL,
+    spec: EqOracleSpec | None,
+    fixed_eq_word_factory: WordFactory[T] | None = None,
+) -> EqOracle:
+    oracles: list[Oracle] = []
+
+    if fixed_eq_word_factory is not None:
+        oracles.append(FixedWordsEqOracle(alphabet, sul, fixed_eq_word_factory))
+
+    if spec is not None:
+        oracles.append(build_base_eq_oracle(alphabet, sul, spec))
+
+    if not oracles:
+        raise ValueError("At least one equivalence oracle must be configured.")
+
+    if len(oracles) == 1:
+        return oracles[0]
+
+    return ChainedEqOracle(list(alphabet), sul, oracles)
