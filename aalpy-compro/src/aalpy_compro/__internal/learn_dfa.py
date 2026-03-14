@@ -29,7 +29,7 @@ KVCexProcessingLiteral: TypeAlias = Literal[
 
 
 @dataclass
-class LearnConfig:
+class KVLearnConfig:
     cex_processing: KVCexProcessingLiteral = "rs"
     max_learning_rounds: int | None = None
     cache_and_non_det_check: bool = True
@@ -41,7 +41,7 @@ def learn_dfa_KV(
     alphabet: Sequence[T],
     accepts: Callable[[tuple[T, ...]], bool],
     oracle_spec: EqOracleSpec | None,
-    learn_config: LearnConfig,
+    learn_config: KVLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
     sul = PrefixAcceptingSUL(accepts)

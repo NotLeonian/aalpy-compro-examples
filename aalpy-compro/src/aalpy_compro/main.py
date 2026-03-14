@@ -13,7 +13,7 @@ from .__internal.eq_oracles import (
     EqOracleList,
     EqOracleSpec,
 )
-from .__internal.learn_dfa import KVCexProcessingList, LearnConfig, learn_dfa_KV
+from .__internal.learn_dfa import KVCexProcessingList, KVLearnConfig, learn_dfa_KV
 from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
@@ -169,7 +169,7 @@ def main() -> int:
                 depth_first=args.depth_first,
             )
 
-        learn_config = LearnConfig(
+        learn_config = KVLearnConfig(
             cex_processing=args.cex_processing,
             max_learning_rounds=args.max_rounds,
             cache_and_non_det_check=(not args.no_cache),
