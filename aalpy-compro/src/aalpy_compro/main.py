@@ -139,8 +139,7 @@ def main() -> int:
         if args.oracle is None and not has_custom_eq_oracle:
             raise SystemExit(
                 "--kind learn requires at least one equivalence oracle source: "
-                "--oracle, `eq_words`/`iter_eq_words`, or "
-                "`state_extension_words`/`iter_state_extension_words`."
+                "--oracle, `eq_words`/`iter_eq_words`."
             )
 
         if args.oracle is None and args.base_oracle_options_are_non_default():
