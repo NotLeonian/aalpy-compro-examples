@@ -48,14 +48,18 @@ class MainArgs:
             )
 
         raise_value_error_if_non_fullmatch(
-            pattern=NAMESPACE_PATTERN, string=self.namespace, var_name="namespace"
+            pattern=NAMESPACE_PATTERN,
+            string=self.namespace,
+            var_name="namespace",
         )
         if self.key is None:
             if self.kind == "learn":
                 raise ValueError('When --kind is "learn", --key is required.')
         else:
             raise_value_error_if_non_fullmatch(
-                pattern=KEY_PATTERN, string=self.key, var_name="key"
+                pattern=KEY_PATTERN,
+                string=self.key,
+                var_name="key",
             )
 
     def base_oracle_options_are_non_default(self) -> bool:
