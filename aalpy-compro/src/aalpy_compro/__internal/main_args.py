@@ -3,7 +3,11 @@ from typing import Literal, TypeAlias
 import re
 
 from .eq_oracles import EqOracleLiteral
-from .learn_dfa import KVCexProcessingLiteral
+from .learn_dfa import (
+    CliCexProcessingLiteral,
+    LearnAlgorithmLiteral,
+    LStarClosingStrategyLiteral,
+)
 from .re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
 from .fullmatch import validate_fullmatch_pattern
 
@@ -19,16 +23,27 @@ class MainArgs:
     kind: RunKind
     path: str | None
     oracle: EqOracleLiteral | None
+
+    algorithm: LearnAlgorithmLiteral
+
     namespace: str  # NAMESPACE_PATTERN に fullmatch するもの
     key: str | None  # KEY_PATTERN に fullmatch するもの（もしくは None）
-    cex_processing: KVCexProcessingLiteral
+
+    cex_processing: CliCexProcessingLiteral
     max_rounds: int | None
     no_cache: bool
     print_level: int
+
+    closing_strategy: LStarClosingStrategyLiteral
+    e_set_suffix_closed: bool
+    all_prefixes_in_obs_table: bool
+
     max_states: int | None
+
     min_length: int
     expected_length: int
     num_tests: int
+
     walks_per_state: int
     walk_len: int
     max_tests: int | None
@@ -52,6 +67,7 @@ class MainArgs:
             string=self.namespace,
             var_name="namespace",
         )
+
         if self.key is None:
             if self.kind == "learn":
                 raise ValueError('When --kind is "learn", --key is required.')
