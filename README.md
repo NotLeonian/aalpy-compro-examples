@@ -8,7 +8,9 @@ Examples of solving competitive programming problems with automata learning usin
 
 > [!CAUTION]
 > **aalpy-compro をコンテスト中に使用しようとする場合は、使用したいコンテストのルールを事前に確認してください。**  
-> また、AALpy は「AtCoder生成AI対策ルール - 20251003版」([ja](https://info.atcoder.jp/entry/llm-rules-ja) / [en](https://info.atcoder.jp/entry/llm-rules-en)) などで定義されている「生成 AI」にはあたらないとリポジトリの作成者 (@NotLeonian) は考えていますが、**コンテスト中に使用したい場合はそのコンテストの生成 AI に関するルールを事前に確認するとともに、能動オートマトン学習および AALpy について事前に知っておくことを推奨します。**
+> **If you intend to use aalpy-compro during a contest, please check the rules of the contest you plan to participate in beforehand.**  
+> また、AALpy は「AtCoder生成AI対策ルール - 20251003版」([ja](https://info.atcoder.jp/entry/llm-rules-ja) / [en](https://info.atcoder.jp/entry/llm-rules-en)) などで定義されている「生成 AI」にはあたらないとリポジトリの作成者 (@NotLeonian) は考えていますが、**コンテスト中に使用したい場合はそのコンテストの生成 AI に関するルールを事前に確認するとともに、能動オートマトン学習および AALpy について事前に知っておくことを推奨します。**  
+> The repository author (@NotLeonian) believes that AALpy does not fall under the category of “generative AI” as defined by rules such as the “AtCoder Rules against Generative AI - Version 20251003” ([ja](https://info.atcoder.jp/entry/llm-rules-ja) / [en](https://info.atcoder.jp/entry/llm-rules-en)); however, **if you intend to use it during a contest, it is recommended that you check that contest’s rules regarding generative AI in advance and familiarize yourself beforehand with active automata learning and AALpy.**
 
 ## 推奨環境
 ### aalpy-compro および examples
