@@ -73,8 +73,7 @@ def main() -> int:
         default=None,
         help=(
             "Base equivalence oracle. Optional when the property defines "
-            "`eq_words`/`iter_eq_words` or "
-            "`state_extension_words`/`iter_state_extension_words`."
+            "`eq_words`/`iter_eq_words`."
         ),
     )
     parser.add_argument(
@@ -143,7 +142,10 @@ def main() -> int:
             )
 
         if args.oracle is None and args.base_oracle_options_are_non_default():
-            print("Warning: base-oracle-specific options require --oracle.", file=sys.stderr)
+            print(
+                "Warning: base-oracle-specific options require --oracle.",
+                file=sys.stderr,
+            )
 
         oracle_spec: EqOracleSpec | None
 
