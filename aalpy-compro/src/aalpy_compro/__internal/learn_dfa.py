@@ -10,6 +10,8 @@ from .load_property import WordFactory
 from .prefix_accepting_sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
+T = TypeVar("T")
+
 KVCexProcessingList: list[str] = [
     "rs",
     "linear_fwd",
@@ -24,8 +26,6 @@ KVCexProcessingLiteral: TypeAlias = Literal[
     "exponential_fwd",
     "exponential_bwd",
 ]
-
-T = TypeVar("T")
 
 
 @dataclass
