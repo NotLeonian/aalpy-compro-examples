@@ -113,6 +113,15 @@ struct count_accumulator_enabled<
 template <class R>
 inline constexpr bool count_accumulator_enabled_v =
     count_accumulator_enabled<R>::value;
+
+template <class R>
+inline constexpr bool dense_transition_count_enabled_v =
+    count_accumulator_enabled_v<R>;
+
+template <class R>
+inline constexpr bool sparse_transition_count_enabled_v =
+    count_accumulator_enabled_v<R> &&
+    std::is_constructible_v<std::pair<int, R>, int, const R &>;
 } // namespace internal
 
 class DFA {
@@ -246,6 +255,79 @@ class DFA {
                                             int> = 0>
     bool accepts(const Range &r) const {
         return accepts(r, internal::to_int{});
+    }
+
+    // [src][dst]: src から dst に遷移する入力文字の個数
+    //
+    // 返り値の型は atcoder::modint998244353 などにもできる
+    //
+    // 省略された dead 状態 (sink) がある場合、
+    // src ごとの個数の総和が文字集合の要素数に一致しない可能性がある
+    template <class R = int,
+              std::enable_if_t<internal::dense_transition_count_enabled_v<R>,
+                               int> = 0>
+    std::vector<std::vector<R>> dense_transition_count_matrix() {
+        const R zero(0);
+        const R one(1);
+
+        std::vector<std::vector<R>> res(n, std::vector<R>(n, zero));
+        for (int src = 0; src < n; src += 1) {
+            for (int label = 0; label < sigma; label += 1) {
+                int dst = trans[src][label];
+                if (dst >= 0 && dst < n) {
+                    res[src][dst] += one;
+                }
+            }
+        }
+
+        return res;
+    }
+
+    // [src]:
+    // src から dst に遷移する入力文字が存在する dst についての
+    // (dst, src から dst に遷移する入力文字の個数) の vector
+    //
+    // src ごとに格納される dst は狭義単調増加が保証される
+    //
+    // 返り値の個数の型は atcoder::modint998244353 などにもできる
+    //
+    // 省略された dead 状態 (sink) がある場合、
+    // src ごとの個数の総和が文字集合の要素数に一致しない可能性がある
+    template <
+        class R = int,
+        std::enable_if_t<internal::sparse_transition_count_enabled_v<R>, int> = 0>
+    std::vector<std::vector<std::pair<int, R>>>
+    sparse_transition_count_matrix() {
+        const R zero(0);
+        const R one(1);
+
+        std::vector<std::vector<std::pair<int, R>>> res(
+            n, std::vector<std::pair<int, R>>());
+
+        // 個数の型が atcoder::modint998244353 などの場合、
+        // 値が 0 と等しいことと、入力文字が存在しないことは
+        // 同値ではない
+        std::vector<R> cnt(n, zero);
+        std::vector<unsigned char> exists(n, false);
+        for (int src = 0; src < n; src += 1) {
+            std::fill(cnt.begin(), cnt.end(), zero);
+            std::fill(exists.begin(), exists.end(), false);
+            for (int label = 0; label < sigma; label += 1) {
+                int dst = trans[src][label];
+                if (dst >= 0 && dst < n) {
+                    cnt[dst] += one;
+                    exists[dst] = true;
+                }
+            }
+
+            for (int dst = 0; dst < n; dst += 1) {
+                if (static_cast<bool>(exists[dst])) {
+                    res[src].emplace_back(dst, cnt[dst]);
+                }
+            }
+        }
+
+        return res;
     }
 
     // 空でない部分文字列のうち、受理されるものの長さの最大値
