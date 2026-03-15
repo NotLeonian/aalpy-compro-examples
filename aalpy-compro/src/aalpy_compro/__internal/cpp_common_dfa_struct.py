@@ -308,7 +308,7 @@ class DFA {
         // 値が 0 と等しいことと、入力文字が存在しないことは
         // 同値ではない
         std::vector<R> cnt(n, zero);
-        std::vector<unsigned char> exists(n, false);
+        std::vector<unsigned char> exists(n, static_cast<unsigned char>(false));
         for (int src = 0; src < n; src += 1) {
             std::fill(cnt.begin(), cnt.end(), zero);
             std::fill(exists.begin(), exists.end(), false);
