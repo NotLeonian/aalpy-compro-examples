@@ -20,6 +20,10 @@ class MainArgs:
     コマンドライン引数で与えられるオプションのクラス
     """
 
+    print_completion: (
+        None  # --print-completion が指定されているとき、その値はパーサーには渡されない
+    )
+
     kind: RunKind
     path: str | None
     oracle: EqOracleLiteral | None
