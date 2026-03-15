@@ -266,7 +266,7 @@ class DFA {
     template <class R = int,
               std::enable_if_t<internal::dense_transition_count_enabled_v<R>,
                                int> = 0>
-    std::vector<std::vector<R>> dense_transition_count_matrix() {
+    std::vector<std::vector<R>> dense_transition_count_matrix() const {
         const R zero(0);
         const R one(1);
 
@@ -298,7 +298,7 @@ class DFA {
               std::enable_if_t<internal::sparse_transition_count_enabled_v<R>,
                                int> = 0>
     std::vector<std::vector<std::pair<int, R>>>
-    sparse_transition_count_matrix() {
+    sparse_transition_count_matrix() const {
         const R zero(0);
         const R one(1);
 
