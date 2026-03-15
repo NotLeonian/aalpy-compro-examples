@@ -3,6 +3,8 @@ import argparse
 import re
 import sys
 
+import shtab
+
 from .__internal.names import DIST_NAME
 from .__internal.get_version import get_version
 from .__internal.load_property import CustomEqOracleFactoryAttrs, load_property
@@ -58,6 +60,7 @@ def main() -> int:
         return __validator
 
     parser = argparse.ArgumentParser()
+    shtab.add_argument_to(parser, ["--print-completion"])
 
     parser.add_argument(
         "-v",
