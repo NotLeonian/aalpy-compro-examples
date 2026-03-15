@@ -287,15 +287,16 @@ class DFA {
     // src から dst に遷移する入力文字が存在する dst についての
     // (dst, src から dst に遷移する入力文字の個数) の vector
     //
-    // src ごとに格納される dst は狭義単調増加が保証される
+    // src ごとに格納される dst は相異なるが、昇順であることは保証されない
+    // （適宜、ソートする必要がある）
     //
     // 返り値の個数の型は atcoder::modint998244353 などにもできる
     //
     // 省略された dead 状態 (sink) がある場合、
     // src ごとの個数の総和が文字集合の要素数に一致しない可能性がある
-    template <
-        class R = int,
-        std::enable_if_t<internal::sparse_transition_count_enabled_v<R>, int> = 0>
+    template <class R = int,
+              std::enable_if_t<internal::sparse_transition_count_enabled_v<R>,
+                               int> = 0>
     std::vector<std::vector<std::pair<int, R>>>
     sparse_transition_count_matrix() {
         const R zero(0);
@@ -309,22 +310,29 @@ class DFA {
         // 同値ではない
         std::vector<R> cnt(n, zero);
         std::vector<unsigned char> exists(n, static_cast<unsigned char>(false));
+
+        std::vector<int> dsts;
+        dsts.reserve(n);
         for (int src = 0; src < n; src += 1) {
-            std::fill(cnt.begin(), cnt.end(), zero);
-            std::fill(exists.begin(), exists.end(), false);
             for (int label = 0; label < sigma; label += 1) {
                 int dst = trans[src][label];
                 if (dst >= 0 && dst < n) {
                     cnt[dst] += one;
-                    exists[dst] = true;
+                    if (!static_cast<bool>(exists[dst])) {
+                        exists[dst] = static_cast<unsigned char>(true);
+                        dsts.emplace_back(dst);
+                    }
                 }
             }
 
-            for (int dst = 0; dst < n; dst += 1) {
-                if (static_cast<bool>(exists[dst])) {
-                    res[src].emplace_back(dst, cnt[dst]);
-                }
+            res[src].reserve(dsts.size());
+            for (int dst : dsts) {
+                res[src].emplace_back(dst, cnt[dst]);
+                cnt[dst] = zero;
+                exists[dst] = static_cast<unsigned char>(false);
             }
+
+            dsts.clear();
         }
 
         return res;
