@@ -1,0 +1,45 @@
+from collections import deque
+
+H = {H}
+
+alphabet = list(range(1 << H))
+
+
+def __is_black(s: list[int], i: int, j: int) -> bool:
+    return (s[i] >> j) % 2 == 1
+
+
+def accepts(word: tuple[int, ...]) -> bool:
+    s = list(word)
+    n = len(s)
+
+    if n == 0:
+        return False
+
+    if not __is_black(s, 0, 0) or not __is_black(s, -1, H - 1):
+        return False
+
+    seen = [True] + [False] * (n * H - 1)
+    q = deque([0])
+    while len(q):
+        idx = q.pop()
+        i, j = idx // H, idx % H
+
+        if i < n - 1 and not seen[idx + H] and __is_black(s, i + 1, j):
+            if idx + H == n * H - 1:
+                return True
+            seen[idx + H] = True
+            q.append(idx + H)
+        if j < H - 1 and not seen[idx + 1] and __is_black(s, i, j + 1):
+            if idx + 1 == n * H - 1:
+                return True
+            seen[idx + 1] = True
+            q.append(idx + 1)
+        if i > 0 and not seen[idx - H] and __is_black(s, i - 1, j):
+            seen[idx - H] = True
+            q.append(idx - H)
+        if j > 0 and not seen[idx - 1] and __is_black(s, i, j - 1):
+            seen[idx - 1] = True
+            q.append(idx - 1)
+
+    return False
