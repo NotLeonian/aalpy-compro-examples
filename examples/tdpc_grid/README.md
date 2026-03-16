@@ -88,4 +88,4 @@ GCC または Clang で、C++17 以上を選択することを推奨する。
 C++17 ぴったりを選択する必要はない。
 
 ## 提出結果
-[AC 提出 (C++23 (GCC 15.2.0), 3 ms)](https://atcoder.jp/contests/tdpc/submissions/74169744)
+[AC 提出 (C++23 (GCC 15.2.0), 3 ms)](https://atcoder.jp/contests/tdpc/submissions/74170181)

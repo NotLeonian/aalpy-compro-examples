@@ -1370,16 +1370,17 @@ fast_pow(std::uniform_int_distribution<> &randint, std::mt19937 &mt,
     int n = b.size();
     auto g = mat_minpoly(randint, mt, A);
     auto inv = fps_inv(reversed(g));
-    auto quo = [&](const std::vector<mint> &poly) -> std::vector<mint> {
+    auto quo = [&reversed, &g,
+                &inv](const std::vector<mint> &poly) -> std::vector<mint> {
         if (poly.size() < g.size()) {
             return {};
         }
         int m = poly.size() - g.size() + 1;
         auto l = reversed(poly);
-        l.resize(n);
-        std::vector<mint> r(inv.begin(), inv.begin() + n);
+        l.resize(m);
+        std::vector<mint> r(inv.begin(), inv.begin() + m);
         auto prod = fps_mul(l, r);
-        prod.resize(n);
+        prod.resize(m);
         return reversed(prod);
     };
 
