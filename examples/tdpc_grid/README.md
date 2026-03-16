@@ -74,6 +74,9 @@ Black Box Linear Algebra 等の実装は [Nyaan's Library の実装](https://nya
 > [!NOTE]
 > refined_solution.cpp では、learned_dfa.cpp に `main` 関数などを追加するだけでなく、標準ライブラリの追加のインクルードや clang-format によるフォーマットも行っている。
 
+TDPC-S の答えの法は $998244353$ ではなく $10^9+7$ であり、この実装ではあえて任意 mod 畳み込みを使用せず、愚直に畳み込みを計算している（Black Box Linear Algebra による行列累乗と列ベクトルの積の計算において、畳み込みは大きなボトルネックではない）。  
+なお、この問題に対する最小 DFA は状態数が小さいため、[Nyaan's Library の任意 mod 畳み込み](https://nyaannyaan.github.io/library/ntt/arbitrary-ntt.hpp)を使用しても、内部では愚直に計算されるはずである。
+
 ### コンパイル・実行
 GCC の場合、以下のようなコンパイルコマンドを想定している。
 ```bash
