@@ -1348,7 +1348,7 @@ std::vector<mint> fps_inv(const std::vector<mint> &f) {
     res[0] = inv0;
     for (int i = 1; i < n; i += 1) {
         mint sum = 0;
-        for (int j = 1; j < n; j += 1) {
+        for (int j = 1; j <= i; j += 1) {
             sum += f[j] * res[i - j];
         }
         res[i] = -sum * inv0;
