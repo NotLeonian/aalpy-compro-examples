@@ -68,7 +68,7 @@ aalpy-compro では、状態 $i$ から状態 $j$ に遷移する入力文字の
 このとき、答えは $(A^W b)_{\mathrm{ini}}$ である。
 
 状態数を $N$ とする。  
-疎行列の場合、 $W$ が大きければ $(A^0 b) _ {\mathrm{ini}},\,(A^1 b) _ {\mathrm{ini}},\,(A^2 b) _ {\mathrm{ini}},\,\ldots,\,(A^{2N-1} b) _ {\mathrm{ini}}$ (最初の $2N$ 項) を素朴に求めて Berlekamp–Massey / Bostan–Mori アルゴリズムを使用するのが高速である。
+疎行列の場合、 $W$ が大きければ $(A^0 b) _ {\mathrm{ini}},\thinspace (A^1 b) _ {\mathrm{ini}},\thinspace (A^2 b) _ {\mathrm{ini}},\thinspace \ldots,\thinspace (A^{2N-1} b) _ {\mathrm{ini}}$ (最初の $2N$ 項) を素朴に求めて Berlekamp–Massey / Bostan–Mori アルゴリズムを使用するのが高速である。
 
 ただし、この問題では $W$ の上限が大きくないので、全て素朴に計算するとして問題ない。
 
