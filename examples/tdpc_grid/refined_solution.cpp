@@ -2,12 +2,10 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <iterator>
-#include <random>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -1245,195 +1243,24 @@ static const int __learned_dfa_register_6 = [] {
 
 #include <atcoder/modint>
 using mint = atcoder::modint1000000007;
+using sparse_matrix_type = std::vector<std::vector<std::pair<int, mint>>>;
 
-std::vector<mint> random_poly(std::uniform_int_distribution<> &randint,
-                              std::mt19937 &mt, int n) {
+std::vector<mint> matrix_vector_product(sparse_matrix_type &A,
+                                        std::vector<mint> &b) {
+    int n = int(b.size());
+    assert(A.size() == n);
+
     std::vector<mint> res(n);
-    for (auto &c : res) {
-        c = randint(mt);
-    }
-    return res;
-}
-
-std::vector<mint> Berlekamp_Massey_rev(const std::vector<mint> &s) {
-    int n = s.size();
-    std::vector<mint> b, c;
-    b.reserve(n + 1);
-    c.reserve(n + 1);
-    b.emplace_back(1);
-    c.emplace_back(1);
-    mint y = 1;
-    for (int ed = 1; ed <= n; ed += 1) {
-        int l = c.size(), m = b.size();
-        mint x = 0;
-        for (int i = 0; i < l; i += 1) {
-            x += c[i] * s[ed - l + i];
-        }
-        b.emplace_back(0);
-        m += 1;
-        if (x == 0) {
-            continue;
-        }
-        mint freq = x / y;
-        if (l < m) {
-            auto tmp = c;
-            c.insert(std::begin(c), m - l, 0);
-            for (int i = 0; i < m; i += 1) {
-                c[m - 1 - i] -= freq * b[m - 1 - i];
-            }
-            b = tmp;
-            y = x;
-        } else {
-            for (int i = 0; i < m; i += 1) {
-                c[m - 1 - i] -= freq * b[m - 1 - i];
-            }
-        }
-    }
-    return c;
-}
-
-std::vector<mint> vector_minpoly(std::uniform_int_distribution<> &randint,
-                                 std::mt19937 &mt,
-                                 const std::vector<std::vector<mint>> &b) {
-    int n = b.size(), m = b[0].size();
-    std::vector<mint> u = random_poly(randint, mt, m), a(n);
     for (int i = 0; i < n; i += 1) {
-        for (int j = 0; j < m; j += 1) {
-            a[i] += b[i][j] * u[j];
+        for (auto [j, val] : A[i]) {
+            assert(j >= 0 && j < n);
+            res[i] += val * b[j];
         }
-    }
-    return Berlekamp_Massey_rev(a);
-}
-
-std::vector<mint>
-mat_minpoly(std::uniform_int_distribution<> &randint, std::mt19937 &mt,
-            const std::vector<std::vector<std::pair<int, mint>>> &A) {
-    int n = A.size();
-    std::vector<mint> u = random_poly(randint, mt, n);
-    std::vector<std::vector<mint>> b(2 * n + 1);
-    std::vector<mint> next_u(n);
-    for (int i = 0; i < 2 * n + 1; i += 1) {
-        b[i] = u;
-        fill(next_u.begin(), next_u.end(), 0);
-        for (int j = 0; j < n; j += 1) {
-            for (auto [k, val] : A[j]) {
-                next_u[j] += val * u[k];
-            }
-        }
-        swap(u, next_u);
-    }
-    return vector_minpoly(randint, mt, b);
-}
-
-std::vector<mint> fps_mul(const std::vector<mint> &l,
-                          const std::vector<mint> &r) {
-    if (l.empty() || r.empty()) {
-        return std::vector<mint>();
-    }
-    int n = l.size(), m = r.size();
-    std::vector<mint> res(n + m - 1);
-    for (int i = 0; i < n; i += 1) {
-        for (int j = 0; j < m; j += 1) {
-            res[i + j] += l[i] * r[j];
-        }
-    }
-    return res;
-}
-
-std::vector<mint> fps_inv(const std::vector<mint> &f) {
-    assert(!f.empty() && f[0] != 0);
-    int n = f.size();
-    std::vector<mint> res(n);
-    mint inv0 = f[0].inv();
-    res[0] = inv0;
-    for (int i = 1; i < n; i += 1) {
-        mint sum = 0;
-        for (int j = 1; j <= i; j += 1) {
-            sum += f[j] * res[i - j];
-        }
-        res[i] = -sum * inv0;
-    }
-    return res;
-}
-
-std::vector<mint>
-fast_pow(std::uniform_int_distribution<> &randint, std::mt19937 &mt,
-         const std::vector<std::vector<std::pair<int, mint>>> &A,
-         std::vector<mint> b, std::int64_t k) {
-    auto reversed = [](const std::vector<mint> &f) -> std::vector<mint> {
-        std::vector<mint> res;
-        res.reserve(f.size());
-        std::reverse_copy(f.begin(), f.end(), std::back_inserter(res));
-        return res;
-    };
-
-    int n = b.size();
-    auto g = mat_minpoly(randint, mt, A);
-    auto inv = fps_inv(reversed(g));
-    auto quo = [&reversed, &g,
-                &inv](const std::vector<mint> &poly) -> std::vector<mint> {
-        if (poly.size() < g.size()) {
-            return {};
-        }
-        int m = poly.size() - g.size() + 1;
-        auto l = reversed(poly);
-        l.resize(m);
-        std::vector<mint> r(inv.begin(), inv.begin() + m);
-        auto prod = fps_mul(l, r);
-        prod.resize(m);
-        return reversed(prod);
-    };
-
-    std::vector<mint> c{1}, base{0, 1};
-    while (k) {
-        if (k % 2 == 1) {
-            c = fps_mul(c, base);
-            std::vector<mint> prod = fps_mul(quo(c), g);
-            unsigned long prod_sz = prod.size();
-            c.resize(std::max(c.size(), prod_sz));
-            for (int i = 0; i < prod_sz; i += 1) {
-                c[i] -= prod[i];
-            }
-            while (!c.empty() && c.back() == 0) {
-                c.pop_back();
-            }
-        }
-        base = fps_mul(base, base);
-        std::vector<mint> prod = fps_mul(quo(base), g);
-        unsigned long prod_sz = prod.size();
-        base.resize(std::max(base.size(), prod_sz));
-        for (int i = 0; i < prod_sz; i += 1) {
-            base[i] -= prod[i];
-        }
-        while (!base.empty() && base.back() == 0) {
-            base.pop_back();
-        }
-        k /= 2;
-    }
-
-    std::vector<mint> res(n);
-    int c_sz = c.size();
-    std::vector<mint> next_b(n);
-    for (int i = 0; i < c_sz; i += 1) {
-        for (int j = 0; j < n; j += 1) {
-            res[j] += c[i] * b[j];
-        }
-        fill(next_b.begin(), next_b.end(), 0);
-        for (int j = 0; j < n; j += 1) {
-            for (auto [k, val] : A[j]) {
-                next_b[j] += val * b[k];
-            }
-        }
-        swap(b, next_b);
     }
     return res;
 }
 
 int main(void) {
-    std::random_device rnd;
-    std::mt19937 mt(rnd());
-    std::uniform_int_distribution<> randint(0, mint::mod() - 1);
-
     std::string h;
     int w;
     std::cin >> h >> w;
@@ -1446,8 +1273,9 @@ int main(void) {
         b[i] = dfa.is_accepting(i);
     }
 
-    std::cout
-        << fast_pow(randint, mt, A, b, w)[dfa.index_of_initial_state()].val()
-        << "\n";
+    for (int i = 0; i < w; i += 1) {
+        b = matrix_vector_product(A, b);
+    }
+    std::cout << b[dfa.index_of_initial_state()].val() << "\n";
     return 0;
 }
