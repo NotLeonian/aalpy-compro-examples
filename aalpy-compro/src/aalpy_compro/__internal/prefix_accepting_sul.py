@@ -1,12 +1,12 @@
-from collections.abc import Callable
+from collections.abc import Callable, Hashable
 from typing import Generic, TypeVar
 
 from aalpy.base import SUL
 
-T = TypeVar("T")
+Hashable_T = TypeVar("Hashable_T", bound=Hashable)
 
 
-class PrefixAcceptingSUL(SUL, Generic[T]):
+class PrefixAcceptingSUL(SUL, Generic[Hashable_T]):
     """
     愚直や CYK 法などで実装された
     accepts(word: tuple[T, ...]) -> bool
@@ -16,11 +16,11 @@ class PrefixAcceptingSUL(SUL, Generic[T]):
     引数 word の型は str 等ではないことに注意
     """
 
-    def __init__(self, accepts: Callable[[tuple[T, ...]], bool]):
+    def __init__(self, accepts: Callable[[tuple[Hashable_T, ...]], bool]):
         super().__init__()
         self.accepts = accepts
-        self.prefix: list[T] = []
-        self.memo: dict[tuple[T, ...], bool] = {}
+        self.prefix: list[Hashable_T] = []
+        self.memo: dict[tuple[Hashable_T, ...], bool] = {}
 
     def pre(self) -> None:
         self.prefix.clear()
@@ -28,7 +28,7 @@ class PrefixAcceptingSUL(SUL, Generic[T]):
     def post(self) -> None:
         pass
 
-    def step(self, letter: T | None) -> bool:
+    def step(self, letter: Hashable_T | None) -> bool:
         if letter is not None:
             self.prefix.append(letter)
 
