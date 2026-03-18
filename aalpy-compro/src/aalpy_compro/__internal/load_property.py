@@ -1,18 +1,18 @@
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from importlib.util import spec_from_file_location, module_from_spec
 from typing import Generic, TypeAlias, TypeVar, cast
 
-T = TypeVar("T")
+Hashable_T = TypeVar("Hashable_T", bound=Hashable)
 
-WordFactory: TypeAlias = Callable[[], Iterable[tuple[T, ...]]]
+WordFactory: TypeAlias = Callable[[], Iterable[tuple[Hashable_T, ...]]]
 
 
 def iter_words(
-    raw: Iterable[Iterable[T]],
+    raw: Iterable[Iterable[Hashable_T]],
     *,
     attr_name: str,
-) -> Iterator[tuple[T, ...]]:
+) -> Iterator[tuple[Hashable_T, ...]]:
     if isinstance(raw, (str, bytes)):
         raise ValueError(
             f"`{attr_name}` must be a non-string iterable of non-string iterables."
@@ -86,11 +86,11 @@ def load_word_factory(
 
 
 @dataclass(frozen=True)
-class LearningProperty(Generic[T]):
-    alphabet: Sequence[T]
-    accepts: Callable[[tuple[T, ...]], bool]
-    symbol_to_label: Callable[[T], str] = str
-    fixed_eq_word_factory: WordFactory[T] | None = None
+class LearningProperty(Generic[Hashable_T]):
+    alphabet: Sequence[Hashable_T]
+    accepts: Callable[[tuple[Hashable_T, ...]], bool]
+    symbol_to_label: Callable[[Hashable_T], str] = str
+    fixed_eq_word_factory: WordFactory[Hashable_T] | None = None
 
 
 def load_property(path: str) -> LearningProperty[object]:

@@ -20,7 +20,7 @@ implementation in this file were designed and implemented independently for
 `aalpy-compro`, and are not copied from code snippets in that Discussion.
 """
 
-from collections.abc import Sequence
+from collections.abc import Hashable, Sequence
 from typing import Generic, TypeVar
 
 from aalpy.automata import Dfa
@@ -28,17 +28,17 @@ from aalpy.base import Oracle, SUL
 
 from .load_property import WordFactory
 
-T = TypeVar("T")
+Hashable_T = TypeVar("Hashable_T", bound=Hashable)
 
 
-class ChainedEqOracle(Oracle, Generic[T]):
+class ChainedEqOracle(Oracle, Generic[Hashable_T]):
     """
     複数の EqOracle を順番に試し、最初に見つかった counterexample を返す。
     """
 
     def __init__(
         self,
-        alphabet: Sequence[T],
+        alphabet: Sequence[Hashable_T],
         sul: SUL,
         oracles: Sequence[Oracle],
     ):
@@ -51,7 +51,7 @@ class ChainedEqOracle(Oracle, Generic[T]):
         oracle.num_queries = 0
         oracle.num_steps = 0
 
-    def find_cex(self, hypothesis: Dfa[T]) -> tuple[T, ...] | None:
+    def find_cex(self, hypothesis: Dfa[Hashable_T]) -> tuple[Hashable_T, ...] | None:
         for oracle in self.oracles:
             # AALpy 側で CacheSUL が差し替えられた後でも、
             # 子 oracle 全体が同じ SUL を使うように揃える。
@@ -66,19 +66,19 @@ class ChainedEqOracle(Oracle, Generic[T]):
         return None
 
 
-class PrefixAwareEqOracle(Oracle, Generic[T]):
+class PrefixAwareEqOracle(Oracle, Generic[Hashable_T]):
     """
     check_word 関数を持つ EqOracle の基底クラス
     """
 
-    def __init__(self, alphabet: Sequence[T], sul: SUL) -> None:
+    def __init__(self, alphabet: Sequence[Hashable_T], sul: SUL) -> None:
         super().__init__(list(alphabet), sul)
 
     def check_word(
         self,
-        hypothesis: Dfa[T],
-        word: tuple[T, ...],
-    ) -> tuple[T, ...] | None:
+        hypothesis: Dfa[Hashable_T],
+        word: tuple[Hashable_T, ...],
+    ) -> tuple[Hashable_T, ...] | None:
         hyp_outs = hypothesis.compute_output_seq(hypothesis.initial_state, word)
         sul_outs = self.sul.query(word)
 
@@ -97,21 +97,21 @@ class PrefixAwareEqOracle(Oracle, Generic[T]):
         return None
 
 
-class FixedWordsEqOracle(PrefixAwareEqOracle[T]):
+class FixedWordsEqOracle(PrefixAwareEqOracle[Hashable_T]):
     """
     指定した語について順番に試し、最初に見つかった counterexample を返す。
     """
 
     def __init__(
         self,
-        alphabet: Sequence[T],
+        alphabet: Sequence[Hashable_T],
         sul: SUL,
-        word_factory: WordFactory[T],
+        word_factory: WordFactory[Hashable_T],
     ) -> None:
         super().__init__(list(alphabet), sul)
         self.word_factory = word_factory
 
-    def find_cex(self, hypothesis: Dfa[T]) -> tuple[T, ...] | None:
+    def find_cex(self, hypothesis: Dfa[Hashable_T]) -> tuple[Hashable_T, ...] | None:
         for word in self.word_factory():
             cex = self.check_word(hypothesis, word)
             if cex is not None:
