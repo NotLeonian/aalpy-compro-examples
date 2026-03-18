@@ -25,6 +25,14 @@ class Regex(Generic[Hashable_T]):
     """
     正規表現を AST で表すオブジェクト。
 
+    `Regex` の等値性・ハッシュは、この AST の構造に基づく。
+    つまり、このクラスは正規言語の同値類の canonical representative ではなく、
+    あくまで正規表現 AST の値オブジェクトである。
+    したがって、局所的な簡約 (例: `ε` の除去、`∅` の吸収、`(R*)* -> R*`,
+    `R | R -> R`) は行うが、一般の言語同値までは同一視しない。
+    特に、和集合の子要素順は保持されるため、`a | b` と `b | a` は、
+    同じ言語を表していても別の AST として比較されうる。
+
     公開 API からは有限木しか構築できないが、
     悪意のあるコードが循環参照を作ることはできる。
     防御には `ensure_acyclic()` を用いる。
@@ -146,10 +154,8 @@ class Regex(Generic[Hashable_T]):
         語 word のみを含む単集合言語
         """
 
-        regex: Self = cls.epsilon()
-        for symbol in word:
-            regex = regex.concat(cls.symbol(symbol))
-        return regex
+        parts = tuple(cls.symbol(symbol) for symbol in word)
+        return cls.__concat(*parts)
 
     def star(self) -> Self:
         """
