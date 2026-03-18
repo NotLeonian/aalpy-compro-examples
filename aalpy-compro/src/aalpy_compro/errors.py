@@ -27,3 +27,9 @@ class ConstraintViolationError(LearningError, ValueError):
         if details:
             msg += f". Details: {details}"
         super().__init__(msg)
+
+
+__all__ = [
+    "LearningError",
+    "ConstraintViolationError",
+]
