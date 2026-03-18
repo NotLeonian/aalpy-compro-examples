@@ -1,6 +1,11 @@
 from collections.abc import Hashable, Iterable
 from dataclasses import dataclass
-from typing import Generic, Literal, Self, TypeAlias, TypeVar, cast
+from typing import Generic, Literal, Self, TypeAlias, TypeVar
+
+from .__internal.missing_symbol_payload import (
+    MissingSymbolPayload,
+    MISSING_SYMBOL_PAYLOAD,
+)
 
 Hashable_T = TypeVar("Hashable_T", bound=Hashable)
 
@@ -25,24 +30,24 @@ class Regex(Generic[Hashable_T]):
     """
 
     _kind: RegexKindLiteral
-    _symbol: Hashable_T | None = None
+    _symbol: Hashable_T | MissingSymbolPayload = MISSING_SYMBOL_PAYLOAD
     _parts: tuple[Self, ...] = ()
 
     def __post_init__(self) -> None:
         if self._kind == "empty_set" or self._kind == "epsilon":
-            if self._symbol is not None or self._parts:
+            if not isinstance(self._symbol, MissingSymbolPayload) or self._parts:
                 raise ValueError(f"Regex kind {self._kind!r} cannot have payload.")
             return
 
         if self._kind == "symbol":
-            if self._symbol is None:
+            if isinstance(self._symbol, MissingSymbolPayload):
                 raise ValueError("Symbol regex requires `_symbol`.")
             if self._parts:
                 raise ValueError("Symbol regex cannot have child regexes.")
             return
 
         if self._kind == "concat" or self._kind == "union":
-            if self._symbol is not None:
+            if not isinstance(self._symbol, MissingSymbolPayload):
                 raise ValueError(f"Regex kind {self._kind!r} cannot have `_symbol`.")
             if len(self._parts) < 2:
                 raise ValueError(
@@ -51,7 +56,7 @@ class Regex(Generic[Hashable_T]):
             return
 
         if self._kind == "star":
-            if self._symbol is not None:
+            if not isinstance(self._symbol, MissingSymbolPayload):
                 raise ValueError("Star regex cannot have `_symbol`.")
             if len(self._parts) != 1:
                 raise ValueError("Star regex requires exactly one child regex.")
@@ -180,6 +185,14 @@ class Regex(Generic[Hashable_T]):
             return NotImplemented
         return self.union(other)
 
+    def __require_symbol_payload(self) -> Hashable_T:
+        if self._kind != "symbol":
+            raise ValueError("This regex node does not carry a symbol payload.")
+        payload = self._symbol
+        if isinstance(payload, MissingSymbolPayload):
+            raise AssertionError("Symbol regex must carry `_symbol`.")
+        return payload
+
     def ensure_acyclic(self) -> None:
         """
         このインスタンスが循環参照になっていないことを保証する。
@@ -223,7 +236,7 @@ class Regex(Generic[Hashable_T]):
             visited.add(node_id)
 
             if node._kind == "symbol":
-                result.add(cast(Hashable_T, node._symbol))
+                result.add(node.__require_symbol_payload())
                 return
 
             for child in node._parts:
@@ -240,7 +253,7 @@ class Regex(Generic[Hashable_T]):
         if self._kind == "epsilon":
             return "ε"
         if self._kind == "symbol":
-            return repr(self._symbol)
+            return repr(self.__require_symbol_payload())
         if self._kind == "concat":
             s = " ".join(
                 part.__maybe_parenthesize(outer_prec=2) for part in self._parts
