@@ -26,7 +26,7 @@ from typing import Generic, TypeVar
 from aalpy.automata import Dfa
 from aalpy.base import Oracle, SUL
 
-from .load_property import WordFactory
+from .learning_property import WordFactory
 
 Hashable_T = TypeVar("Hashable_T", bound=Hashable)
 

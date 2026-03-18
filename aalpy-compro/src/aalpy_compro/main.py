@@ -7,7 +7,10 @@ import shtab
 
 from .__internal.names import DIST_NAME
 from .__internal.get_version import get_version
-from .__internal.load_property import CustomEqOracleFactoryAttrs, load_property
+from .__internal.learning_property import (
+    CustomEqOracleFactoryAttrs,
+    load_learning_property,
+)
 from .__internal.eq_oracles import (
     WpSpec,
     RandomWpSpec,
@@ -188,7 +191,7 @@ def main() -> int:
         if args.path is None:
             raise SystemExit("--kind learn requires --path.")
 
-        property = load_property(args.path)
+        property = load_learning_property(args.path)
 
         has_custom_eq_oracle = any(
             getattr(property, attr_name, None) is not None
