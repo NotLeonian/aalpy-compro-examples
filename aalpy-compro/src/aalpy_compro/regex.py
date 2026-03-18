@@ -36,14 +36,14 @@ class Regex(Generic[Hashable_T]):
 
         if self._kind == "symbol":
             if self._symbol is None:
-                raise ValueError("Symbol regex requires `symbol`.")
+                raise ValueError("Symbol regex requires `_symbol`.")
             if self._parts:
                 raise ValueError("Symbol regex cannot have child regexes.")
             return
 
         if self._kind == "concat" or self._kind == "union":
             if self._symbol is not None:
-                raise ValueError(f"Regex kind {self._kind!r} cannot have `symbol`.")
+                raise ValueError(f"Regex kind {self._kind!r} cannot have `_symbol`.")
             if len(self._parts) < 2:
                 raise ValueError(
                     f"Regex kind {self._kind!r} requires at least two child regexes."
@@ -52,7 +52,7 @@ class Regex(Generic[Hashable_T]):
 
         if self._kind == "star":
             if self._symbol is not None:
-                raise ValueError("Star regex cannot have `symbol`.")
+                raise ValueError("Star regex cannot have `_symbol`.")
             if len(self._parts) != 1:
                 raise ValueError("Star regex requires exactly one child regex.")
             return
