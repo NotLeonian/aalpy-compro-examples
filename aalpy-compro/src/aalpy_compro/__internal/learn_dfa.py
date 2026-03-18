@@ -7,7 +7,7 @@ from aalpy.base import Oracle, SUL
 from aalpy.learning_algs import run_Lstar, run_KV
 
 from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
-from .load_property import WordFactory
+from .learning_property import WordFactory
 from .prefix_accepting_sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 

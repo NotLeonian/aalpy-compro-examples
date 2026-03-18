@@ -93,7 +93,7 @@ class LearningProperty(Generic[Hashable_T]):
     fixed_eq_word_factory: WordFactory[Hashable_T] | None = None
 
 
-def load_property(path: str) -> LearningProperty[object]:
+def load_learning_property(path: str) -> LearningProperty[object]:
     """
     必須:
       - alphabet: Sequence[T]

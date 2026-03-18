@@ -5,7 +5,7 @@ from typing import Literal, TypeAlias, TypeVar
 from aalpy.base import Oracle, SUL
 from aalpy.oracles import WpMethodEqOracle, RandomWpMethodEqOracle, StatePrefixEqOracle
 
-from .load_property import WordFactory
+from .learning_property import WordFactory
 from .custom_eq_oracles import ChainedEqOracle, FixedWordsEqOracle
 
 EqOracle: TypeAlias = Oracle
