@@ -20,7 +20,13 @@ def regex_kind_precedence(kind: RegexKindLiteral) -> int:
     return 4
 
 
-def parenthesize_text(*, text: str, inner_prec: int, outer_prec: int) -> str:
-    if inner_prec < outer_prec:
+def parenthesize_text(
+    *,
+    text: str,
+    inner_prec: int,
+    outer_prec: int,
+    parenthesize_on_equal: bool = False,
+) -> str:
+    if inner_prec < outer_prec or (parenthesize_on_equal and inner_prec == outer_prec):
         return f"({text})"
     return text

@@ -313,6 +313,7 @@ class Regex(Generic[Hashable_T]):
                     text=texts[id(child)],
                     inner_prec=regex_kind_precedence(child._kind),
                     outer_prec=3,
+                    parenthesize_on_equal=(child._kind == "star"),
                 )
                 text = f"{child_text}*"
             else:
