@@ -220,7 +220,7 @@ def regex_to_dfa(
     regex: Regex[T],
     alphabet: Sequence[T],
 ) -> Dfa[T]:
-    alphabet_tuple = validate_aalpy_alphabet(alphabet)
+    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
 
     regex.ensure_acyclic()
     used_symbols = regex.symbols()

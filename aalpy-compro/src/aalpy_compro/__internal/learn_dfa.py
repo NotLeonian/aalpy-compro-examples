@@ -205,7 +205,7 @@ def learn_dfa_Lstar(
     learn_config: LStarLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
-    alphabet_tuple = validate_aalpy_alphabet(alphabet)
+    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
 
     sul = PrefixAcceptingSUL(accepts)
     eq_oracle = build_eq_oracle(
@@ -234,7 +234,7 @@ def learn_dfa_KV(
     learn_config: KVLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
-    alphabet_tuple = validate_aalpy_alphabet(alphabet)
+    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
 
     sul = PrefixAcceptingSUL(accepts)
     eq_oracle = build_eq_oracle(

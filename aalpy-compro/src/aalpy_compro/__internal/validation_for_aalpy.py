@@ -6,7 +6,7 @@ from .learning_property import WordFactory
 T = TypeVar("T", bound=Hashable)
 
 
-def validate_aalpy_alphabet(alphabet: Sequence[T]) -> tuple[T, ...]:
+def validate_aalpy_alphabet(alphabet: Sequence[T]) -> tuple[tuple[T, ...], set[T]]:
     alphabet_tuple = tuple(alphabet)
 
     try:
@@ -23,7 +23,7 @@ def validate_aalpy_alphabet(alphabet: Sequence[T]) -> tuple[T, ...]:
             "because AALpy reserves `None` as the empty-word / no-input marker."
         )
 
-    return alphabet_tuple
+    return alphabet_tuple, alphabet_set
 
 
 def validate_aalpy_word(

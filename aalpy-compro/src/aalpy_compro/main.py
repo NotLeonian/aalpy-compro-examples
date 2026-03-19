@@ -29,7 +29,7 @@ from .__internal.learn_dfa import (
     normalize_lstar_cex_processing,
     normalize_kv_cex_processing,
 )
-from .__internal.dfa_to_cpp import dfa_to_dot_string, dot_to_cpp
+from .__internal.dfa_to_cpp import aalpy_dfa_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
 from .__internal.fullmatch import validate_fullmatch_pattern
@@ -274,8 +274,8 @@ def main() -> int:
         )
 
         assert args.key is not None  # MainArgs の __post_init__ で弾かれている
-        res = dot_to_cpp(
-            dot_text=dfa_to_dot_string(dfa),
+        res = aalpy_dfa_to_cpp(
+            dfa=dfa,
             alphabet=property.alphabet,
             symbol_to_label=property.symbol_to_label,
             namespace=args.namespace,
