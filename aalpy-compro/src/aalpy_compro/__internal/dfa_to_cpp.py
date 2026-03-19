@@ -129,6 +129,64 @@ def parse_aalpy_dfa_dot(dot_text: str, *, drop_unreachable: bool = True) -> Pars
     return ParsedDfa(states, initial_state, accepting, trans)
 
 
+def validated_labels(
+    *,
+    alphabet: Sequence[T],
+    symbol_to_label: Callable[[T], str],
+) -> tuple[list[str], dict[str, int]]:
+    labels = [symbol_to_label(a) for a in alphabet]
+    label_to_col = {label: i for i, label in enumerate(labels)}
+    if len(label_to_col) != len(labels):
+        raise ValueError("`alphabet` has duplicate labels after `symbol_to_label`.")
+    return labels, label_to_col
+
+
+def render_cpp(
+    *,
+    namespace: str,
+    key: str,
+    labels: list[str],
+    initial_state: int,
+    accepting: list[int],
+    trans_table: list[list[int]],
+) -> str:
+    n = len(trans_table)
+    sigma = len(labels)
+
+    res: list[str] = []
+    res.append("#include <array>")
+    res.append("")
+    res.append(f"namespace {namespace}_{key} {{")
+    res.append(f"// States: {n}, Alphabet: {sigma}")
+    res.append("// Symbol index mapping:")
+    for j, label in enumerate(labels):
+        res.append(f"//   {j}: {label}")
+    res.append("")
+    res.append(f"inline constexpr int N = {n};")
+    res.append(f"inline constexpr int SIGMA = {sigma};")
+    res.append(f"inline constexpr int INITIAL_STATE = {initial_state};")
+    res.append("")
+    res.append("inline constexpr std::array<unsigned char, N> ACCEPTING = {{")
+    res.append(f"    {', '.join(map(str, accepting))}")
+    res.append("}};")
+    res.append("")
+    res.append("inline constexpr std::array<std::array<int, SIGMA>, N> TRANS = {{")
+    for trans_row in trans_table:
+        res.append(f"    {{{{{', '.join(map(str, trans_row))}}}}},")
+    res.append("}};")
+    res.append("")
+    res.append(f"static const int __{namespace}_register_{key} = [] {{")
+    res.append(
+        f'    {namespace}::dfas().register_dfa(INITIAL_STATE, ACCEPTING, TRANS, "{key}");'
+    )
+    res.append("    return 0;")
+    res.append("}();")
+    res.append(f"}} // namespace {namespace}_{key}")
+    res.append("")
+
+    return "\n".join(res)
+
+
 def dot_to_cpp(
     *,
     dot_text: str,
@@ -144,14 +202,14 @@ def dot_to_cpp(
 
     parsed = parse_aalpy_dfa_dot(dot_text)
 
-    labels = [symbol_to_label(a) for a in alphabet]
-    label_to_col = {label: i for i, label in enumerate(labels)}
-    if len(label_to_col) != len(labels):
-        raise ValueError("`alphabet` has duplicate labels after `symbol_to_label`.")
+    labels, label_to_col = validated_labels(
+        alphabet=alphabet,
+        symbol_to_label=symbol_to_label,
+    )
 
     adj: dict[str, dict[str, str]] = {s: {} for s in parsed.states}
     for (src, label), dst in parsed.trans.items():
-        if label not in labels:
+        if label not in label_to_col:
             raise ValueError("`dot_text` has unknown labels.")
 
         adj[src][label] = dst
@@ -185,35 +243,11 @@ def dot_to_cpp(
     for i, s in enumerate(parsed.states):
         accepting[i] = 1 if parsed.accepting.get(s, False) else 0
 
-    res: list[str] = []
-    res.append("#include <array>")
-    res.append("")
-    res.append(f"namespace {namespace}_{key} {{")
-    res.append(f"// States: {n}, Alphabet: {sigma}")
-    res.append("// Symbol index mapping:")
-    for j, label in enumerate(labels):
-        res.append(f"//   {j}: {label}")
-    res.append("")
-    res.append(f"inline constexpr int N = {n};")
-    res.append(f"inline constexpr int SIGMA = {sigma};")
-    res.append(f"inline constexpr int INITIAL_STATE = {initial_state};")
-    res.append("")
-    res.append("inline constexpr std::array<unsigned char, N> ACCEPTING = {{")
-    res.append(f"    {', '.join(map(str, accepting))}")
-    res.append("}};")
-    res.append("")
-    res.append("inline constexpr std::array<std::array<int, SIGMA>, N> TRANS = {{")
-    for i in range(n):
-        res.append(f"    {{{{{', '.join(map(str, trans_table[i]))}}}}},")
-    res.append("}};")
-    res.append("")
-    res.append(f"static const int __{namespace}_register_{key} = [] {{")
-    res.append(
-        f'    {namespace}::dfas().register_dfa(INITIAL_STATE, ACCEPTING, TRANS, "{key}");'
+    return render_cpp(
+        trans_table=trans_table,
+        accepting=accepting,
+        labels=labels,
+        initial_state=initial_state,
+        namespace=namespace,
+        key=key,
     )
-    res.append("    return 0;")
-    res.append("}();")
-    res.append(f"}} // namespace {namespace}_{key}")
-    res.append("")
-
-    return "\n".join(res)
