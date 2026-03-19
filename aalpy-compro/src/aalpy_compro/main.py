@@ -11,6 +11,7 @@ from .__internal.learning_property import (
     CustomEqOracleFactoryAttrs,
     load_learning_property,
 )
+from .__internal.regex_property import load_regex_property
 from .__internal.eq_oracles import (
     WpSpec,
     RandomWpSpec,
@@ -29,6 +30,7 @@ from .__internal.learn_dfa import (
     normalize_lstar_cex_processing,
     normalize_kv_cex_processing,
 )
+from .__internal.regex_to_dfa import regex_to_dfa
 from .__internal.dfa_to_cpp import aalpy_dfa_to_cpp
 from .__internal.cpp_common_dfa_struct import common_dfa_struct
 from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
@@ -38,8 +40,8 @@ from .__internal.main_args import MainArgs
 
 def main() -> int:
     """
-    path で受け取った alphabet や accepts の実装をもとに
-    オートマトン学習を行い、cpp ファイルを出力する
+    path で受け取った property をもとに
+    DFA を生成し、cpp ファイルを出力する
 
     オプションはコマンドライン引数で与える
     """
@@ -74,13 +76,13 @@ def main() -> int:
 
     parser.add_argument(
         "--kind",
-        choices=["learn", "common"],
-        help='Select "learn" or "common" (default: "learn").',
+        choices=["learn", "regex", "common"],
+        help='Select "learn", "regex", or "common" (default: "learn").',
         default="learn",
     )
     parser.add_argument(
         "--path",
-        help="Path to .py file providing alphabet/accepts",
+        help="Path to .py file providing alphabet/accepts or alphabet/regex",
         default=None,
     )
     parser.add_argument(
@@ -117,7 +119,7 @@ def main() -> int:
         help="\n".join(
             [
                 f"--key must match /{KEY_PATTERN.pattern}/.",
-                'When --kind is "learn", effectively required.',
+                'When --kind is "learn" or "regex", effectively required.',
                 "Each name should be unique.",
             ]
         ),
@@ -191,10 +193,10 @@ def main() -> int:
         if args.path is None:
             raise SystemExit("--kind learn requires --path.")
 
-        property = load_learning_property(args.path)
+        learning_property = load_learning_property(args.path)
 
         has_custom_eq_oracle = any(
-            getattr(property, attr_name, None) is not None
+            getattr(learning_property, attr_name, None) is not None
             for attr_name in CustomEqOracleFactoryAttrs
         )
 
@@ -266,23 +268,43 @@ def main() -> int:
             )
 
         dfa = learn_dfa(
-            alphabet=property.alphabet,
-            accepts=property.accepts,
+            alphabet=learning_property.alphabet,
+            accepts=learning_property.accepts,
             oracle_spec=oracle_spec,
             learn_config=learn_config,
-            fixed_eq_word_factory=property.fixed_eq_word_factory,
+            fixed_eq_word_factory=learning_property.fixed_eq_word_factory,
         )
 
         assert args.key is not None  # MainArgs の __post_init__ で弾かれている
         res = aalpy_dfa_to_cpp(
             dfa=dfa,
-            alphabet=property.alphabet,
-            symbol_to_label=property.symbol_to_label,
+            alphabet=learning_property.alphabet,
+            symbol_to_label=learning_property.symbol_to_label,
             namespace=args.namespace,
             key=args.key,
             add_sink_if_missing=True,
         )
 
+        print(res)
+    elif args.kind == "regex":
+        if args.path is None:
+            raise SystemExit("--kind regex requires --path.")
+
+        regex_property = load_regex_property(args.path)
+        dfa = regex_to_dfa(
+            regex=regex_property.regex,
+            alphabet=regex_property.alphabet,
+        )
+
+        assert args.key is not None  # MainArgs の __post_init__ で弾かれている
+        res = aalpy_dfa_to_cpp(
+            dfa=dfa,
+            alphabet=regex_property.alphabet,
+            symbol_to_label=regex_property.symbol_to_label,
+            namespace=args.namespace,
+            key=args.key,
+            add_sink_if_missing=False,
+        )
         print(res)
     else:
         print(common_dfa_struct(namespace=args.namespace))
