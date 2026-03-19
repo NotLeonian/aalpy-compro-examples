@@ -289,14 +289,6 @@ class Regex(Generic[Hashable_T]):
                 text = "ε"
             elif kind == "symbol":
                 text = repr(node.__require_symbol_payload())
-            elif kind == "star":
-                child = node._parts[0]
-                child_text = parenthesize_text(
-                    text=texts[id(child)],
-                    inner_prec=regex_kind_precedence(child._kind),
-                    outer_prec=3,
-                )
-                text = f"{child_text}*"
             elif kind == "concat":
                 text = " ".join(
                     parenthesize_text(
@@ -315,6 +307,14 @@ class Regex(Generic[Hashable_T]):
                     )
                     for part in node._parts
                 )
+            elif kind == "star":
+                child = node._parts[0]
+                child_text = parenthesize_text(
+                    text=texts[id(child)],
+                    inner_prec=regex_kind_precedence(child._kind),
+                    outer_prec=3,
+                )
+                text = f"{child_text}*"
             else:
                 raise AssertionError(f"Unknown regex kind: {kind!r}")
 
