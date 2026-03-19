@@ -11,7 +11,7 @@ from .learning_property import WordFactory
 from .prefix_accepting_sul import PrefixAcceptingSUL
 from ..errors import ConstraintViolationError
 
-Hashable_T = TypeVar("Hashable_T", bound=Hashable)
+T = TypeVar("T", bound=Hashable)
 
 LearnAlgorithmList: list[str] = ["lstar", "kv"]
 LearnAlgorithmLiteral: TypeAlias = Literal["lstar", "kv"]
@@ -94,7 +94,7 @@ class KVLearnConfig:
 LearnConfigSpec: TypeAlias = KVLearnConfig | LStarLearnConfig
 
 
-def check_wp_constraint(dfa: Dfa[Hashable_T], oracle_spec: EqOracleSpec | None) -> None:
+def check_wp_constraint(dfa: Dfa[T], oracle_spec: EqOracleSpec | None) -> None:
     if not isinstance(oracle_spec, WpSpec):
         return
 
@@ -141,12 +141,12 @@ def normalize_kv_cex_processing(
 
 def learn_dfa(
     *,
-    alphabet: Sequence[Hashable_T],
-    accepts: Callable[[tuple[Hashable_T, ...]], bool],
+    alphabet: Sequence[T],
+    accepts: Callable[[tuple[T, ...]], bool],
     oracle_spec: EqOracleSpec | None,
     learn_config: LearnConfigSpec,
-    fixed_eq_word_factory: WordFactory[Hashable_T] | None = None,
-) -> Dfa[Hashable_T]:
+    fixed_eq_word_factory: WordFactory[T] | None = None,
+) -> Dfa[T]:
     if isinstance(learn_config, LStarLearnConfig):
         return learn_dfa_Lstar(
             alphabet=alphabet,
@@ -167,11 +167,11 @@ def learn_dfa(
 
 def run_Lstar_compat(
     *,
-    alphabet: list[Hashable_T],
+    alphabet: list[T],
     sul: SUL,
     eq_oracle: Oracle,
     learn_config: LStarLearnConfig,
-) -> Dfa[Hashable_T]:
+) -> Dfa[T]:
     """
     run_Lstar について
     型チェックが誤反応しないためのヘルパー
@@ -198,12 +198,12 @@ def run_Lstar_compat(
 
 def learn_dfa_Lstar(
     *,
-    alphabet: Sequence[Hashable_T],
-    accepts: Callable[[tuple[Hashable_T, ...]], bool],
+    alphabet: Sequence[T],
+    accepts: Callable[[tuple[T, ...]], bool],
     oracle_spec: EqOracleSpec | None,
     learn_config: LStarLearnConfig,
-    fixed_eq_word_factory: WordFactory[Hashable_T] | None = None,
-) -> Dfa[Hashable_T]:
+    fixed_eq_word_factory: WordFactory[T] | None = None,
+) -> Dfa[T]:
     sul = PrefixAcceptingSUL(accepts)
     eq_oracle = build_eq_oracle(
         alphabet,
@@ -225,12 +225,12 @@ def learn_dfa_Lstar(
 
 def learn_dfa_KV(
     *,
-    alphabet: Sequence[Hashable_T],
-    accepts: Callable[[tuple[Hashable_T, ...]], bool],
+    alphabet: Sequence[T],
+    accepts: Callable[[tuple[T, ...]], bool],
     oracle_spec: EqOracleSpec | None,
     learn_config: KVLearnConfig,
-    fixed_eq_word_factory: WordFactory[Hashable_T] | None = None,
-) -> Dfa[Hashable_T]:
+    fixed_eq_word_factory: WordFactory[T] | None = None,
+) -> Dfa[T]:
     sul = PrefixAcceptingSUL(accepts)
     eq_oracle = build_eq_oracle(
         alphabet,

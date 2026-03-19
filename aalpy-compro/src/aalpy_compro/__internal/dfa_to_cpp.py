@@ -9,10 +9,10 @@ from aalpy.utils.FileHandler import save_automaton_to_file
 
 import pydot
 
-Hashable_T = TypeVar("Hashable_T", bound=Hashable)
+T = TypeVar("T", bound=Hashable)
 
 
-def dfa_to_dot_string(dfa: Dfa[Hashable_T]) -> str:
+def dfa_to_dot_string(dfa: Dfa[T]) -> str:
     # AALpy では DFA の DOT を文字列として保存することが可能
     res = save_automaton_to_file(dfa, file_type="string")
     assert res is not None
@@ -132,8 +132,8 @@ def parse_aalpy_dfa_dot(dot_text: str, *, drop_unreachable: bool = True) -> Pars
 def dot_to_cpp(
     *,
     dot_text: str,
-    alphabet: Sequence[Hashable_T],
-    symbol_to_label: Callable[[Hashable_T], str] = str,
+    alphabet: Sequence[T],
+    symbol_to_label: Callable[[T], str] = str,
     namespace: str = "learned_dfa",
     key: str = "",
     add_sink_if_missing: bool = True,

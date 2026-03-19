@@ -12,7 +12,7 @@ EqOracle: TypeAlias = Oracle
 EqOracleList: list[str] = ["wp", "random_wp", "state_prefix"]
 EqOracleLiteral: TypeAlias = Literal["wp", "random_wp", "state_prefix"]
 
-Hashable_T = TypeVar("Hashable_T", bound=Hashable)
+T = TypeVar("T", bound=Hashable)
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,7 @@ EqOracleSpec: TypeAlias = WpSpec | RandomWpSpec | StatePrefixSpec
 
 
 def build_base_eq_oracle(
-    alphabet: Sequence[Hashable_T],
+    alphabet: Sequence[T],
     sul: SUL,
     spec: EqOracleSpec,
 ) -> EqOracle:
@@ -82,10 +82,10 @@ def build_base_eq_oracle(
 
 
 def build_eq_oracle(
-    alphabet: Sequence[Hashable_T],
+    alphabet: Sequence[T],
     sul: SUL,
     spec: EqOracleSpec | None,
-    fixed_eq_word_factory: WordFactory[Hashable_T] | None = None,
+    fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> EqOracle:
     oracles: list[Oracle] = []
 
