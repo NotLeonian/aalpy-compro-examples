@@ -5,6 +5,7 @@ from typing import Generic, TypeVar
 
 from aalpy.automata import Dfa
 
+from .missing_symbol_payload import MissingSymbolPayload
 from ..regex import Regex
 
 T = TypeVar("T", bound=Hashable)
@@ -66,59 +67,88 @@ def validate_alphabet(alphabet: Sequence[T]) -> tuple[T, ...]:
     return alphabet_tuple
 
 
-def build_fragment(
-    regex: Regex[T],
-    builder: NfaBuilder[T],
-) -> tuple[int, int]:
-    if regex._kind == "empty_set":
-        return builder.new_state(), builder.new_state()
-
-    if regex._kind == "epsilon":
-        start = builder.new_state()
-        end = builder.new_state()
-        builder.add_epsilon_transition(start, end)
-        return start, end
-
-    if regex._kind == "symbol":
-        start = builder.new_state()
-        end = builder.new_state()
-        builder.add_symbol_transition(start, regex.require_symbol_payload(), end)
-        return start, end
-
-    if regex._kind == "concat":
-        parts = regex._parts
-        first_start, current_end = build_fragment(parts[0], builder)
-        for part in parts[1:]:
-            next_start, next_end = build_fragment(part, builder)
-            builder.add_epsilon_transition(current_end, next_start)
-            current_end = next_end
-        return first_start, current_end
-
-    if regex._kind == "union":
-        start = builder.new_state()
-        end = builder.new_state()
-        for part in regex._parts:
-            part_start, part_end = build_fragment(part, builder)
-            builder.add_epsilon_transition(start, part_start)
-            builder.add_epsilon_transition(part_end, end)
-        return start, end
-
-    if regex._kind == "star":
-        start = builder.new_state()
-        end = builder.new_state()
-        inner_start, inner_end = build_fragment(regex._parts[0], builder)
-        builder.add_epsilon_transition(start, end)
-        builder.add_epsilon_transition(start, inner_start)
-        builder.add_epsilon_transition(inner_end, end)
-        builder.add_epsilon_transition(inner_end, inner_start)
-        return start, end
-
-    raise AssertionError(f"Unknown regex kind: {regex._kind!r}")
-
-
 def regex_to_nfa(regex: Regex[T]) -> Nfa[T]:
+    """
+    Thompson's construction
+    """
+
     builder = NfaBuilder[T]()
-    start, end = build_fragment(regex, builder)
+    call_stack: deque[tuple[Regex[T], bool]] = deque([(regex, False)])
+    fragment_stack: list[tuple[int, int]] = []
+
+    while call_stack:
+        node, ready = call_stack.pop()
+        kind = node._kind
+
+        if not ready:
+            if kind == "empty_set":
+                fragment_stack.append((builder.new_state(), builder.new_state()))
+                continue
+
+            if kind == "epsilon":
+                start = builder.new_state()
+                end = builder.new_state()
+                builder.add_epsilon_transition(start, end)
+                fragment_stack.append((start, end))
+                continue
+
+            if kind == "symbol":
+                start = builder.new_state()
+                end = builder.new_state()
+                payload = node._symbol
+                if isinstance(payload, MissingSymbolPayload):
+                    raise AssertionError("Symbol regex must carry `_symbol`.")
+                builder.add_symbol_transition(start, payload, end)
+                fragment_stack.append((start, end))
+                continue
+
+            call_stack.append((node, True))
+            for child in reversed(node._parts):
+                call_stack.append((child, False))
+            continue
+
+        if kind == "concat":
+            child_count = len(node._parts)
+            child_fragments = fragment_stack[-child_count:]
+            del fragment_stack[-child_count:]
+            first_start, current_end = child_fragments[0]
+            for next_start, next_end in child_fragments[1:]:
+                builder.add_epsilon_transition(current_end, next_start)
+                current_end = next_end
+            fragment_stack.append((first_start, current_end))
+            continue
+
+        if kind == "union":
+            child_count = len(node._parts)
+            child_fragments = fragment_stack[-child_count:]
+            del fragment_stack[-child_count:]
+            start = builder.new_state()
+            end = builder.new_state()
+            for part_start, part_end in child_fragments:
+                builder.add_epsilon_transition(start, part_start)
+                builder.add_epsilon_transition(part_end, end)
+            fragment_stack.append((start, end))
+            continue
+
+        if kind == "star":
+            inner_start, inner_end = fragment_stack.pop()
+            start = builder.new_state()
+            end = builder.new_state()
+            builder.add_epsilon_transition(start, end)
+            builder.add_epsilon_transition(start, inner_start)
+            builder.add_epsilon_transition(inner_end, end)
+            builder.add_epsilon_transition(inner_end, inner_start)
+            fragment_stack.append((start, end))
+            continue
+
+        raise AssertionError(f"Unknown regex kind: {kind!r}")
+
+    if len(fragment_stack) != 1:
+        raise AssertionError(
+            "Internal error: Thompson construction did not end with exactly one fragment."
+        )
+
+    start, end = fragment_stack.pop()
     return Nfa(
         start_state=start,
         accepting_states=frozenset({end}),
