@@ -39,6 +39,22 @@ class Regex(Generic[Hashable_T]):
     _parts: tuple[Self, ...] = ()
 
     def __post_init__(self) -> None:
+        parts: tuple[Self, ...]
+        if isinstance(self._parts, tuple):
+            parts = self._parts
+        else:
+            try:
+                parts = tuple(self._parts)
+            except TypeError as e:
+                raise TypeError(
+                    "Regex `_parts` must be a tuple or other iterable of child regexes."
+                ) from e
+            object.__setattr__(self, "_parts", parts)
+
+        for part in parts:
+            if not isinstance(part, Regex):
+                raise TypeError("Regex `_parts` must contain only `Regex` nodes.")
+
         if self._kind == "empty_set" or self._kind == "epsilon":
             if not isinstance(self._symbol, MissingSymbolPayload) or self._parts:
                 raise ValueError(f"Regex kind {self._kind!r} cannot have payload.")
