@@ -5,7 +5,7 @@ from typing import Generic, TypeVar
 
 from aalpy.automata import Dfa
 
-from .validate_aalpy_alphabet import validate_aalpy_alphabet
+from .validation_for_aalpy import validate_aalpy_alphabet
 from .missing_symbol_payload import MissingSymbolPayload
 from ..regex import Regex
 
