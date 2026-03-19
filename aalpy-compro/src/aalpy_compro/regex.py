@@ -273,9 +273,7 @@ class Regex(Generic[Hashable_T]):
             return f"({s})" if outer_prec > 1 else s
         if self._kind == "star":
             child = self._parts[0]
-            child_str = child.__to_string(outer_prec=3)
-            if child._kind in ["concat", "union"]:
-                child_str = f"({child_str})"
+            child_str = child.__maybe_parenthesize(outer_prec=3)
             return f"{child_str}*"
 
         raise AssertionError(f"Unknown regex kind: {self._kind!r}")
