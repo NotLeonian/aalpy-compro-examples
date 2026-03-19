@@ -13,11 +13,11 @@ from .__internal.missing_symbol_payload import (
     MISSING_SYMBOL_PAYLOAD,
 )
 
-Hashable_T = TypeVar("Hashable_T", bound=Hashable)
+T = TypeVar("T", bound=Hashable)
 
 
 @dataclass(frozen=True, slots=True, eq=False)
-class Regex(Generic[Hashable_T]):
+class Regex(Generic[T]):
     """
     正規表現を AST で表すオブジェクト。
 
@@ -35,7 +35,7 @@ class Regex(Generic[Hashable_T]):
     """
 
     _kind: RegexKindLiteral
-    _symbol: Hashable_T | MissingSymbolPayload = MISSING_SYMBOL_PAYLOAD
+    _symbol: T | MissingSymbolPayload = MISSING_SYMBOL_PAYLOAD
     _parts: tuple[Self, ...] = ()
     _hash_cache: int | None = field(
         default=None,
@@ -49,7 +49,7 @@ class Regex(Generic[Hashable_T]):
         self, _: SupportsIndex
     ) -> tuple[
         object,
-        tuple[RegexKindLiteral, Hashable_T | MissingSymbolPayload, tuple[Self, ...]],
+        tuple[RegexKindLiteral, T | MissingSymbolPayload, tuple[Self, ...]],
     ]:
         return (type(self), (self._kind, self._symbol, self._parts))
 
@@ -60,7 +60,7 @@ class Regex(Generic[Hashable_T]):
 
         hashes: dict[int, int] = {}
         visiting: set[int] = {id(self)}
-        stack: deque[tuple[Regex[Hashable_T], int]] = deque([(self, 0)])
+        stack: deque[tuple[Regex[T], int]] = deque([(self, 0)])
 
         while stack:
             node, child_index = stack[-1]
@@ -131,9 +131,7 @@ class Regex(Generic[Hashable_T]):
 
         other.ensure_acyclic()
 
-        stack: deque[tuple[Regex[Hashable_T], Regex[Hashable_T]]] = deque(
-            [(self, other)]
-        )
+        stack: deque[tuple[Regex[T], Regex[T]]] = deque([(self, other)])
         seen_pairs: set[tuple[int, int]] = set()
 
         while stack:
@@ -225,7 +223,7 @@ class Regex(Generic[Hashable_T]):
         return cls("epsilon")
 
     @classmethod
-    def symbol(cls, symbol: Hashable_T) -> Self:
+    def symbol(cls, symbol: T) -> Self:
         """
         symbol のみを含む単集合言語
         """
@@ -284,7 +282,7 @@ class Regex(Generic[Hashable_T]):
         return self.__union(self, *others)
 
     @classmethod
-    def word(cls, word: Iterable[Hashable_T]) -> Self:
+    def word(cls, word: Iterable[T]) -> Self:
         """
         語 word のみを含む単集合言語
         """
@@ -327,7 +325,7 @@ class Regex(Generic[Hashable_T]):
             return NotImplemented
         return self.union(other)
 
-    def __require_symbol_payload(self) -> Hashable_T:
+    def __require_symbol_payload(self) -> T:
         if self._kind != "symbol":
             raise ValueError("This regex node does not carry a symbol payload.")
         payload = self._symbol
@@ -344,7 +342,7 @@ class Regex(Generic[Hashable_T]):
 
         visited: set[int] = set()
         visiting: set[int] = {id(self)}
-        stack: deque[tuple[Regex[Hashable_T], int]] = deque([(self, 0)])
+        stack: deque[tuple[Regex[T], int]] = deque([(self, 0)])
 
         while stack:
             node, child_index = stack[-1]
@@ -367,7 +365,7 @@ class Regex(Generic[Hashable_T]):
             visiting.add(child_id)
             stack.append((child, 0))
 
-    def symbols(self) -> frozenset[Hashable_T]:
+    def symbols(self) -> frozenset[T]:
         """
         この正規表現 AST 内に実際に出現する文字の集合を
         frozenset で返す。
@@ -375,9 +373,9 @@ class Regex(Generic[Hashable_T]):
 
         self.ensure_acyclic()
 
-        result: set[Hashable_T] = set()
+        result: set[T] = set()
         visited: set[int] = set()
-        stack: deque[Regex[Hashable_T]] = deque([self])
+        stack: deque[Regex[T]] = deque([self])
 
         while stack:
             node = stack.pop()
@@ -399,7 +397,7 @@ class Regex(Generic[Hashable_T]):
         self.ensure_acyclic()
 
         texts: dict[int, str] = {}
-        stack: list[tuple[Regex[Hashable_T], int]] = [(self, 0)]
+        stack: list[tuple[Regex[T], int]] = [(self, 0)]
 
         while stack:
             node, child_index = stack[-1]
