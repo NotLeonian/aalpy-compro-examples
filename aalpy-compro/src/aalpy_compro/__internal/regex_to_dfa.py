@@ -5,6 +5,7 @@ from typing import Generic, TypeVar
 
 from aalpy.automata import Dfa
 
+from .validate_aalpy_alphabet import validate_aalpy_alphabet
 from .missing_symbol_payload import MissingSymbolPayload
 from ..regex import Regex
 
@@ -51,20 +52,6 @@ class Nfa(Generic[T]):
     accepting_states: frozenset[int]
     symbol_transitions: dict[int, dict[T, set[int]]]
     epsilon_transitions: dict[int, set[int]]
-
-
-def validate_alphabet(alphabet: Sequence[T]) -> tuple[T, ...]:
-    alphabet_tuple = tuple(alphabet)
-
-    try:
-        alphabet_set = set(alphabet_tuple)
-    except TypeError as e:
-        raise ValueError("`alphabet` must contain only hashable symbols.") from e
-
-    if len(alphabet_set) != len(alphabet_tuple):
-        raise ValueError("`alphabet` must not contain duplicates.")
-
-    return alphabet_tuple
 
 
 def regex_to_nfa(regex: Regex[T]) -> Nfa[T]:
@@ -233,7 +220,7 @@ def regex_to_dfa(
     regex: Regex[T],
     alphabet: Sequence[T],
 ) -> Dfa[T]:
-    alphabet_tuple = validate_alphabet(alphabet)
+    alphabet_tuple = validate_aalpy_alphabet(alphabet)
 
     regex.ensure_acyclic()
     used_symbols = regex.symbols()
