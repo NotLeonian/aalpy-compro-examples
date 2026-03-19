@@ -33,9 +33,24 @@ class PrefixAcceptingSUL(SUL, Generic[T]):
             self.prefix.append(letter)
 
         key = tuple(self.prefix)
-        if key in self.memo:
-            return self.memo[key]
+
+        try:
+            if key in self.memo:
+                return self.memo[key]
+        except TypeError as e:
+            raise TypeError(
+                "Input symbols must be hashable because prefix words are used "
+                "as memoization keys in PrefixAcceptingSUL."
+            ) from e
 
         val = self.accepts(key)
-        self.memo[key] = val
+
+        try:
+            self.memo[key] = val
+        except TypeError as e:
+            raise TypeError(
+                "Input symbols must be hashable because prefix words are used "
+                "as memoization keys in PrefixAcceptingSUL."
+            ) from e
+
         return val
