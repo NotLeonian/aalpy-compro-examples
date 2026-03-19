@@ -6,6 +6,7 @@ from aalpy.automata import Dfa
 from aalpy.base import Oracle, SUL
 from aalpy.learning_algs import run_Lstar, run_KV
 
+from .validation_for_aalpy import validate_aalpy_alphabet
 from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
 from .learning_property import WordFactory
 from .prefix_accepting_sul import PrefixAcceptingSUL
@@ -167,7 +168,7 @@ def learn_dfa(
 
 def run_Lstar_compat(
     *,
-    alphabet: list[T],
+    alphabet_list: list[T],
     sul: SUL,
     eq_oracle: Oracle,
     learn_config: LStarLearnConfig,
@@ -178,7 +179,7 @@ def run_Lstar_compat(
     """
 
     dfa = run_Lstar(
-        alphabet,
+        alphabet_list,
         sul,
         eq_oracle,
         automaton_type="dfa",
@@ -204,16 +205,18 @@ def learn_dfa_Lstar(
     learn_config: LStarLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
+    alphabet_tuple = validate_aalpy_alphabet(alphabet)
+
     sul = PrefixAcceptingSUL(accepts)
     eq_oracle = build_eq_oracle(
-        alphabet,
+        alphabet_tuple,
         sul,
         oracle_spec,
         fixed_eq_word_factory=fixed_eq_word_factory,
     )
 
     dfa = run_Lstar_compat(
-        alphabet=list(alphabet),
+        alphabet_list=list(alphabet_tuple),
         sul=sul,
         eq_oracle=eq_oracle,
         learn_config=learn_config,
@@ -231,16 +234,18 @@ def learn_dfa_KV(
     learn_config: KVLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
+    alphabet_tuple = validate_aalpy_alphabet(alphabet)
+
     sul = PrefixAcceptingSUL(accepts)
     eq_oracle = build_eq_oracle(
-        alphabet,
+        alphabet_tuple,
         sul,
         oracle_spec,
         fixed_eq_word_factory=fixed_eq_word_factory,
     )
 
     dfa = run_KV(
-        list(alphabet),
+        list(alphabet_tuple),
         sul,
         eq_oracle,
         automaton_type="dfa",

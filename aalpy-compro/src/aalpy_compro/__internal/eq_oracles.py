@@ -5,6 +5,7 @@ from typing import Literal, TypeAlias, TypeVar
 from aalpy.base import Oracle, SUL
 from aalpy.oracles import WpMethodEqOracle, RandomWpMethodEqOracle, StatePrefixEqOracle
 
+from .validation_for_aalpy import wrap_fixed_eq_word_factory_for_aalpy
 from .learning_property import WordFactory
 from .custom_eq_oracles import ChainedEqOracle, FixedWordsEqOracle
 
@@ -88,6 +89,8 @@ def build_eq_oracle(
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> EqOracle:
     oracles: list[Oracle] = []
+
+    fixed_eq_word_factory = wrap_fixed_eq_word_factory_for_aalpy(fixed_eq_word_factory)
 
     if fixed_eq_word_factory is not None:
         oracles.append(FixedWordsEqOracle(alphabet, sul, fixed_eq_word_factory))

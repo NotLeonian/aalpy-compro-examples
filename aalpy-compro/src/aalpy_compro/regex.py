@@ -80,7 +80,7 @@ class Regex(Generic[T]):
                 elif kind == "epsilon":
                     node_hash = hash((1,))
                 elif kind == "symbol":
-                    node_hash = hash((2, node.__require_symbol_payload()))
+                    node_hash = hash((2, node.require_symbol_payload()))
                 elif kind == "star":
                     node_hash = hash((3, hashes[id(node._parts[0])]))
                 elif kind == "concat":
@@ -145,7 +145,7 @@ class Regex(Generic[T]):
                 return False
 
             if left._kind == "symbol":
-                if left.__require_symbol_payload() != right.__require_symbol_payload():
+                if left.require_symbol_payload() != right.require_symbol_payload():
                     return False
 
             if len(left._parts) != len(right._parts):
@@ -325,7 +325,13 @@ class Regex(Generic[T]):
             return NotImplemented
         return self.union(other)
 
-    def __require_symbol_payload(self) -> T:
+    def require_symbol_payload(self) -> T:
+        """
+        self._kind が symbol かつ
+        self._symbol が MissingSymbolPayload でない場合のみ
+        self._symbol を返し、そうでなければ例外を送出する。
+        """
+
         if self._kind != "symbol":
             raise ValueError("This regex node does not carry a symbol payload.")
         payload = self._symbol
@@ -385,7 +391,7 @@ class Regex(Generic[T]):
             visited.add(node_id)
 
             if node._kind == "symbol":
-                result.add(node.__require_symbol_payload())
+                result.add(node.require_symbol_payload())
                 continue
 
             for child in reversed(node._parts):
@@ -421,7 +427,7 @@ class Regex(Generic[T]):
             elif kind == "epsilon":
                 text = "ε"
             elif kind == "symbol":
-                text = repr(node.__require_symbol_payload())
+                text = repr(node.require_symbol_payload())
             elif kind == "concat":
                 text = " ".join(
                     parenthesize_text(
