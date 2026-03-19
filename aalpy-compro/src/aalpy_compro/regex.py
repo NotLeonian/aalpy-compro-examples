@@ -1,4 +1,3 @@
-from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from dataclasses import dataclass
 from typing import Generic, Literal, Self, TypeAlias, TypeVar
@@ -129,7 +128,7 @@ class Regex(Generic[Hashable_T]):
 
         if not flat:
             return cls.empty_set()
-        deduped = list(defaultdict.fromkeys(flat))
+        deduped = list(dict.fromkeys(flat))
         if len(deduped) == 1:
             return deduped[0]
         return cls("union", _parts=tuple(deduped))
