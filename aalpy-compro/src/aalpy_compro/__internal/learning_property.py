@@ -15,15 +15,25 @@ def require_hashable(value: Hashable, *, obj_name: str) -> None:
         raise TypeError(f"{obj_name} must be hashable.") from e
 
 
-def validate_alphabet(alphabet: Hashable, *, path: str) -> None:
-    if not isinstance(alphabet, Sequence) or isinstance(alphabet, (str, bytes)):
-        raise ValueError(f"`alphabet` must be a non-string sequence in {path}.")
-
-    for i, symbol in enumerate(alphabet):
-        require_hashable(
-            symbol,
-            obj_name=f"`alphabet[{i}]` in {path}",
+def normalize_alphabet(alphabet: T, *, path: str) -> tuple[T, ...]:
+    if isinstance(alphabet, (str, bytes)):
+        raise ValueError(f"`alphabet` must be a non-string iterable in {path}.")
+    if isinstance(alphabet, Iterator):
+        raise ValueError(
+            f"`alphabet` must be re-iterable in {path}; generators/iterators are not allowed."
         )
+    if not isinstance(alphabet, Iterable):
+        raise ValueError(f"`alphabet` must be a non-string iterable in {path}.")
+
+    try:
+        normalized = tuple(alphabet)
+    except TypeError as e:
+        raise ValueError(f"`alphabet` must be a non-string iterable in {path}.") from e
+
+    for i, symbol in enumerate(normalized):
+        require_hashable(symbol, obj_name=f"`alphabet[{i}]` in {path}")
+
+    return normalized
 
 
 def iter_words(
@@ -169,7 +179,7 @@ def load_learning_property(path: str) -> LearningProperty[Hashable]:
     if not hasattr(mod, "accepts"):
         raise ValueError(f"`accepts` must be defined in {path}.")
 
-    alphabet = getattr(mod, "alphabet")
+    raw_alphabet = getattr(mod, "alphabet")
     raw_accepts = getattr(mod, "accepts")
     raw_symbol_to_label = getattr(mod, "symbol_to_label", str)
 
@@ -178,10 +188,9 @@ def load_learning_property(path: str) -> LearningProperty[Hashable]:
     if not callable(raw_symbol_to_label):
         raise ValueError(f"`symbol_to_label` must be callable in {path}.")
 
+    alphabet = normalize_alphabet(raw_alphabet, path=path)
     accepts = cast(Callable[[tuple[Hashable, ...]], bool], raw_accepts)
     symbol_to_label = cast(Callable[[Hashable], str], raw_symbol_to_label)
-
-    validate_alphabet(alphabet, path=path)
 
     fixed_eq_word_factory = load_word_factory(
         mod,
