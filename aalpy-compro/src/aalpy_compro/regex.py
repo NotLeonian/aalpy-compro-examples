@@ -50,6 +50,10 @@ class Regex(Generic[Hashable_T]):
         if self._kind == "symbol":
             if isinstance(self._symbol, MissingSymbolPayload):
                 raise ValueError("Symbol regex requires `_symbol`.")
+            try:
+                hash(self._symbol)
+            except TypeError as e:
+                raise TypeError("Symbol regex requires a hashable `_symbol`.") from e
             if self._parts:
                 raise ValueError("Symbol regex cannot have child regexes.")
             return
