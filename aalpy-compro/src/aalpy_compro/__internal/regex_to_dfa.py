@@ -82,7 +82,7 @@ def build_fragment(
     if regex._kind == "symbol":
         start = builder.new_state()
         end = builder.new_state()
-        builder.add_symbol_transition(start, regex.__require_symbol_payload(), end)
+        builder.add_symbol_transition(start, regex.require_symbol_payload(), end)
         return start, end
 
     if regex._kind == "concat":
