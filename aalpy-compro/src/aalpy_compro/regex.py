@@ -1,7 +1,7 @@
 from collections import deque
 from collections.abc import Hashable, Iterable
-from dataclasses import dataclass
-from typing import Generic, Self, TypeVar
+from dataclasses import dataclass, field
+from typing import Generic, Self, SupportsIndex, TypeVar
 
 from .__internal.regex_kind import (
     RegexKindLiteral,
@@ -16,7 +16,7 @@ from .__internal.missing_symbol_payload import (
 Hashable_T = TypeVar("Hashable_T", bound=Hashable)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class Regex(Generic[Hashable_T]):
     """
     正規表現を AST で表すオブジェクト。
@@ -37,6 +37,125 @@ class Regex(Generic[Hashable_T]):
     _kind: RegexKindLiteral
     _symbol: Hashable_T | MissingSymbolPayload = MISSING_SYMBOL_PAYLOAD
     _parts: tuple[Self, ...] = ()
+    _hash_cache: int | None = field(
+        default=None,
+        init=False,
+        repr=False,
+        compare=False,
+        hash=False,
+    )
+
+    def __reduce_ex__(
+        self, _: SupportsIndex
+    ) -> tuple[
+        object,
+        tuple[RegexKindLiteral, Hashable_T | MissingSymbolPayload, tuple[Self, ...]],
+    ]:
+        return (type(self), (self._kind, self._symbol, self._parts))
+
+    def __hash__(self) -> int:
+        cached = self._hash_cache
+        if cached is not None:
+            return cached
+
+        hashes: dict[int, int] = {}
+        visiting: set[int] = {id(self)}
+        stack: deque[tuple[Regex[Hashable_T], int]] = deque([(self, 0)])
+
+        while stack:
+            node, child_index = stack[-1]
+            node_id = id(node)
+
+            cached = node._hash_cache
+            if cached is not None:
+                hashes[node_id] = cached
+                visiting.discard(node_id)
+                stack.pop()
+                continue
+
+            if child_index >= len(node._parts):
+                kind = node._kind
+                if kind == "empty_set":
+                    node_hash = hash((0,))
+                elif kind == "epsilon":
+                    node_hash = hash((1,))
+                elif kind == "symbol":
+                    node_hash = hash((2, node.__require_symbol_payload()))
+                elif kind == "star":
+                    node_hash = hash((3, hashes[id(node._parts[0])]))
+                elif kind == "concat":
+                    node_hash = hash(
+                        (4, tuple(hashes[id(child)] for child in node._parts))
+                    )
+                elif kind == "union":
+                    node_hash = hash(
+                        (5, tuple(hashes[id(child)] for child in node._parts))
+                    )
+                else:
+                    raise AssertionError(f"Unknown regex kind: {kind!r}")
+
+                object.__setattr__(node, "_hash_cache", node_hash)
+                hashes[node_id] = node_hash
+                visiting.discard(node_id)
+                stack.pop()
+                continue
+
+            child = node._parts[child_index]
+            stack[-1] = (node, child_index + 1)
+
+            child_id = id(child)
+            child_cached = child._hash_cache
+            if child_cached is not None:
+                hashes[child_id] = child_cached
+                continue
+            if child_id in hashes:
+                continue
+            if child_id in visiting:
+                raise ValueError("Cyclic Regex is not supported.")
+
+            visiting.add(child_id)
+            stack.append((child, 0))
+
+        result = hashes[id(self)]
+        object.__setattr__(self, "_hash_cache", result)
+        return result
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Regex):
+            return False
+
+        self.ensure_acyclic()
+
+        if self is other:
+            return True
+
+        other.ensure_acyclic()
+
+        stack: deque[tuple[Regex[Hashable_T], Regex[Hashable_T]]] = deque(
+            [(self, other)]
+        )
+        seen_pairs: set[tuple[int, int]] = set()
+
+        while stack:
+            left, right = stack.pop()
+            key = (id(left), id(right))
+            if key in seen_pairs:
+                continue
+            seen_pairs.add(key)
+
+            if left._kind != right._kind:
+                return False
+
+            if left._kind == "symbol":
+                if left.__require_symbol_payload() != right.__require_symbol_payload():
+                    return False
+
+            if len(left._parts) != len(right._parts):
+                return False
+
+            stack.extend(zip(left._parts, right._parts, strict=True))
+
+        return True
 
     def __post_init__(self) -> None:
         parts: tuple[Self, ...]
