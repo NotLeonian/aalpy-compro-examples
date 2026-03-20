@@ -35,7 +35,7 @@ requires-dist = [
 
 [[package]]
 name = "aalpy-compro-examples"
-version = "0.5.0"
+version = "0.6.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aalpy-compro" },
