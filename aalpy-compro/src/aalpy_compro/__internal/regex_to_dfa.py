@@ -7,7 +7,7 @@ from aalpy.automata import Dfa
 
 from .validation_for_aalpy import validate_aalpy_alphabet
 from .missing_symbol_payload import MissingSymbolPayload
-from ..regex import Regex
+from ..regex import Regex, ComplementRegex
 
 T = TypeVar("T", bound=Hashable)
 
@@ -229,16 +229,14 @@ def determinize_complete_state_setup(
     return state_setup
 
 
-def regex_to_dfa(
+def compile_plain_regex_to_dfa(
     *,
     regex: Regex[T],
-    alphabet: Sequence[T],
+    alphabet: tuple[T, ...],
 ) -> Dfa[T]:
-    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
-
     regex.ensure_acyclic()
     used_symbols = regex.symbols()
-    missing_symbols = used_symbols.difference(alphabet_tuple)
+    missing_symbols = used_symbols.difference(alphabet)
     if missing_symbols:
         raise ValueError(
             "`regex` contains symbols that are not in `alphabet`: "
@@ -246,7 +244,37 @@ def regex_to_dfa(
         )
 
     nfa = regex_to_nfa(regex=regex, alphabet=alphabet)
-    state_setup = determinize_complete_state_setup(nfa, alphabet=alphabet_tuple)
+    state_setup = determinize_complete_state_setup(nfa, alphabet=alphabet)
     dfa = Dfa.from_state_setup(state_setup)
     dfa.minimize()
     return dfa
+
+
+def complement_dfa(dfa: Dfa[T]) -> Dfa[T]:
+    for state in dfa.states:
+        state.is_accepting = not state.is_accepting
+    return dfa
+
+
+def regex_to_dfa(
+    *,
+    regex: Regex[T] | ComplementRegex[T],
+    alphabet: Sequence[T],
+) -> Dfa[T]:
+    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
+
+    if isinstance(regex, ComplementRegex):
+        regex.ensure_acyclic()
+        dfa = compile_plain_regex_to_dfa(
+            regex=regex.regex,
+            alphabet=alphabet_tuple,
+        )
+        return complement_dfa(dfa)
+
+    if not isinstance(regex, Regex):
+        raise TypeError("`regex` must be a `Regex` or `ComplementRegex`.")
+
+    return compile_plain_regex_to_dfa(
+        regex=regex,
+        alphabet=alphabet_tuple,
+    )

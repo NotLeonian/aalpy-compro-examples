@@ -4,7 +4,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 from typing import Generic, TypeVar, cast
 
 from .normalize_alphabet import normalize_alphabet
-from ..regex import Regex
+from ..regex import Regex, ComplementRegex
 
 T = TypeVar("T", bound=Hashable)
 
@@ -12,7 +12,7 @@ T = TypeVar("T", bound=Hashable)
 @dataclass(frozen=True)
 class RegexProperty(Generic[T]):
     alphabet: Sequence[T]
-    regex: Regex[T]
+    regex: Regex[T] | ComplementRegex[T]
     symbol_to_label: Callable[[T], str] = str
 
 
@@ -20,7 +20,7 @@ def load_regex_property(path: str) -> RegexProperty[Hashable]:
     """
     必須:
       - alphabet: Sequence[T]
-      - regex: Regex[T]
+      - regex: Regex[T] | ComplementRegex[T]
 
     任意:
       - symbol_to_label: Callable[[T], str]
@@ -42,9 +42,9 @@ def load_regex_property(path: str) -> RegexProperty[Hashable]:
     regex = getattr(mod, "regex")
     raw_symbol_to_label = getattr(mod, "symbol_to_label", str)
 
-    if not isinstance(regex, Regex):
+    if not isinstance(regex, (Regex, ComplementRegex)):
         raise ValueError(
-            f"`regex` must be an instance of `aalpy_compro.regex.Regex` in {path}."
+            f"`regex` must be an instance of `aalpy_compro.regex.Regex` or `aalpy_compro.regex.ComplementRegex` in {path}."
         )
     if not callable(raw_symbol_to_label):
         raise ValueError(f"`symbol_to_label` must be callable in {path}.")
