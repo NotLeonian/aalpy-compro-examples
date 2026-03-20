@@ -32,6 +32,9 @@ class Regex(Generic[T]):
     公開 API からは有限木しか構築できないが、
     悪意のあるコードが循環参照を作ることはできる。
     防御には `ensure_acyclic()` を用いる。
+
+    なお、補言語はこのクラスの AST には含めず、
+    `ComplementRegex` クラスで表す。
     """
 
     _kind: RegexKindLiteral
@@ -340,6 +343,20 @@ class Regex(Generic[T]):
             return NotImplemented
         return self.union(other)
 
+    def complement(self) -> "ComplementRegex[T]":
+        """
+        self の補言語を返す。
+
+        返り値は `regex_to_dfa` 関数に与えた
+        alphabet 上での補言語であり、単体では
+        alphabet の情報を持たない。
+        """
+
+        return ComplementRegex(self)
+
+    def __invert__(self) -> "ComplementRegex[T]":
+        return self.complement()
+
     def require_symbol_payload(self) -> T:
         """
         self._kind が symbol かつ
@@ -489,6 +506,61 @@ class Regex(Generic[T]):
         return self.__to_string()
 
 
+@dataclass(frozen=True, slots=True)
+class ComplementRegex(Generic[T]):
+    """
+    `Regex` の補言語を表す薄いラッパーのクラス。
+
+    トップレベル専用のラッパーであり、
+    連結・和集合・閉包などの演算は持たない。
+
+    `regex_to_dfa` 関数に与えた alphabet 上での補言語を表し、
+    このクラス単体では alphabet の情報を持たない。
+    """
+
+    regex: Regex[T]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.regex, Regex):
+            raise TypeError("`ComplementRegex.regex` must be a `Regex`.")
+
+    def complement(self) -> Regex[T]:
+        """
+        self の補言語、すなわち self.regex を返す。
+        """
+
+        return self.regex
+
+    def __invert__(self) -> Regex[T]:
+        return self.complement()
+
+    def ensure_acyclic(self) -> None:
+        """
+        このインスタンスが循環参照になっていないことを保証する。
+
+        循環参照になっていれば ValueError が返る。
+        """
+
+        self.regex.ensure_acyclic()
+
+    def symbols(self) -> frozenset[T]:
+        """
+        この正規表現 AST 内に実際に出現する文字の集合を
+        frozenset で返す。
+        """
+
+        return self.regex.symbols()
+
+    def __str__(self) -> str:
+        inner = parenthesize_text(
+            text=str(self.regex),
+            inner_prec=regex_kind_precedence(self.regex._kind),
+            outer_prec=4,
+        )
+        return f"~{inner}"
+
+
 __all__ = [
     "Regex",
+    "ComplementRegex",
 ]
