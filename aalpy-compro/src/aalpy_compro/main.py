@@ -7,6 +7,7 @@ import shtab
 
 from .__internal.names import DIST_NAME
 from .__internal.get_version import get_version
+from .__internal.shtab_helper import set_shtab_complete
 from .__internal.learning_property import (
     CustomEqOracleFactoryAttrs,
     load_learning_property,
@@ -80,10 +81,13 @@ def main() -> int:
         help='Select "learn", "regex", or "common" (default: "learn").',
         default="learn",
     )
-    parser.add_argument(
-        "--path",
-        help="Path to .py file providing alphabet/accepts or alphabet/regex",
-        default=None,
+    set_shtab_complete(
+        parser.add_argument(
+            "--path",
+            help="Path to .py file providing alphabet/accepts or alphabet/regex",
+            default=None,
+        ),
+        shtab.FILE,
     )
     parser.add_argument(
         "--oracle",
