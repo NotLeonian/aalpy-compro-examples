@@ -91,6 +91,8 @@ class Regex(Generic[T]):
                     node_hash = hash(
                         (5, tuple(hashes[id(child)] for child in node._parts))
                     )
+                elif kind == "dot":
+                    node_hash = hash((6,))
                 else:
                     raise AssertionError(f"Unknown regex kind: {kind!r}")
 
@@ -172,7 +174,7 @@ class Regex(Generic[T]):
             if not isinstance(part, Regex):
                 raise TypeError("Regex `_parts` must contain only `Regex` nodes.")
 
-        if self._kind == "empty_set" or self._kind == "epsilon":
+        if self._kind == "empty_set" or self._kind == "epsilon" or self._kind == "dot":
             if not isinstance(self._symbol, MissingSymbolPayload) or self._parts:
                 raise ValueError(f"Regex kind {self._kind!r} cannot have payload.")
             return
@@ -229,6 +231,19 @@ class Regex(Generic[T]):
         """
 
         return cls("symbol", _symbol=symbol)
+
+    @classmethod
+    def dot(cls) -> Self:
+        """
+        正規表現の `.` にあたる。
+
+        `regex_to_dfa` 関数に与えた alphabet 上の
+        長さ 1 の全ての語を受理する。
+
+        `Regex` クラス単体では alphabet の情報は持たない。
+        """
+
+        return cls("dot")
 
     @classmethod
     def __concat(cls, *parts: Self) -> Self:
@@ -428,6 +443,8 @@ class Regex(Generic[T]):
                 text = "ε"
             elif kind == "symbol":
                 text = repr(node.require_symbol_payload())
+            elif kind == "dot":
+                text = "."
             elif kind == "concat":
                 text = " ".join(
                     parenthesize_text(

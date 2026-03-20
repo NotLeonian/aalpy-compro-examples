@@ -7,6 +7,7 @@ RegexKindLiteral: TypeAlias = Literal[
     "concat",
     "union",
     "star",
+    "dot",
 ]
 
 
