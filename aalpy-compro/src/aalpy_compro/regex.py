@@ -524,6 +524,16 @@ class ComplementRegex(Generic[T]):
         if not isinstance(self.regex, Regex):
             raise TypeError("`ComplementRegex.regex` must be a `Regex`.")
 
+    def complement(self) -> Regex[T]:
+        """
+        self の補言語、すなわち self.regex を返す。
+        """
+
+        return self.regex
+
+    def __invert__(self) -> Regex[T]:
+        return self.complement()
+
     def ensure_acyclic(self) -> None:
         """
         このインスタンスが循環参照になっていないことを保証する。
