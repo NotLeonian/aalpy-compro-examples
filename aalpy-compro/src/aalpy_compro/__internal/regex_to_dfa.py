@@ -54,9 +54,15 @@ class Nfa(Generic[T]):
     epsilon_transitions: dict[int, set[int]]
 
 
-def regex_to_nfa(regex: Regex[T]) -> Nfa[T]:
+def regex_to_nfa(
+    *,
+    regex: Regex[T],
+    alphabet: Sequence[T],
+) -> Nfa[T]:
     """
     Thompson's construction
+
+    `Regex.dot()` は、引数 alphabet 上の 1 文字全体として展開される。
     """
 
     builder = NfaBuilder[T]()
@@ -86,6 +92,14 @@ def regex_to_nfa(regex: Regex[T]) -> Nfa[T]:
                 if isinstance(payload, MissingSymbolPayload):
                     raise AssertionError("Symbol regex must carry `_symbol`.")
                 builder.add_symbol_transition(start, payload, end)
+                fragment_stack.append((start, end))
+                continue
+
+            if kind == "dot":
+                start = builder.new_state()
+                end = builder.new_state()
+                for symbol in alphabet:
+                    builder.add_symbol_transition(start, symbol, end)
                 fragment_stack.append((start, end))
                 continue
 
@@ -231,7 +245,7 @@ def regex_to_dfa(
             f"{sorted(repr(symbol) for symbol in missing_symbols)}"
         )
 
-    nfa = regex_to_nfa(regex)
+    nfa = regex_to_nfa(regex=regex, alphabet=alphabet)
     state_setup = determinize_complete_state_setup(nfa, alphabet=alphabet_tuple)
     dfa = Dfa.from_state_setup(state_setup)
     dfa.minimize()
