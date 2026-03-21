@@ -13,7 +13,6 @@ aalpy-compro では正規表現から最小 DFA を得られる。
 `.*10.*` で表される言語の補言語の最小 DFA を得られればよい。
 
 ### 正規表現の記述
-
 [property.py](./property.py) に `alphabet` と `regex` を Python で記述する。
 
 `from aalpy_compro import Regex` で `Regex` クラスを import できる。
@@ -47,7 +46,6 @@ shebang を書いているので、bash や zsh などであればそのまま `
 [learned_dfa.cpp](./learned_dfa.cpp) が生成される。
 
 ### main 関数などの追加
-
 learned_dfa.cpp には main 関数などがないため、ジャッジ環境に提出できるようにこちらで追加する必要がある。
 
 `learned_dfa::dfas().get(key)` で `key` をキーとする DFA が得られる。  
