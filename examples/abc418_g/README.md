@@ -48,7 +48,6 @@ shebang を書いているので、bash や zsh などであればそのまま `
 [learned_dfa.cpp](./learned_dfa.cpp) が生成される。
 
 ### main 関数などの追加
-
 learned_dfa.cpp には main 関数などがないため、ジャッジ環境に提出できるようにこちらで追加する必要がある。
 
 `learned_dfa::dfas().get(key)` で `key` をキーとする DFA が得られる。
