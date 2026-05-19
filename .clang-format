@@ -1,6 +1,7 @@
 # for C++
 BasedOnStyle: LLVM
 IndentWidth: 4
+InsertBraces: true
 MaxEmptyLinesToKeep: 1
 KeepEmptyLines:
   AtStartOfBlock: false
