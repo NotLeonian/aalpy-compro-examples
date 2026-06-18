@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run
+import subprocess
+import sys
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import subprocess
-import sys
 
 
 @contextmanager
