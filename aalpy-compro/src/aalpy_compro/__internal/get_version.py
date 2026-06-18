@@ -1,4 +1,5 @@
-from importlib.metadata import PackageNotFoundError, version as dist_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as dist_version
 
 from .names import DIST_NAME
 

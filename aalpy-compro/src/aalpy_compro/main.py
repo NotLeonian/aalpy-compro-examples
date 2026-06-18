@@ -1,25 +1,21 @@
-from collections.abc import Callable
 import argparse
 import re
 import sys
+from collections.abc import Callable
 
 import shtab
 
-from .__internal.names import DIST_NAME
-from .__internal.get_version import get_version
-from .__internal.shtab_helper import set_shtab_complete
-from .__internal.learning_property import (
-    CustomEqOracleFactoryAttrs,
-    load_learning_property,
-)
-from .__internal.regex_property import load_regex_property
+from .__internal.cpp_common_dfa_struct import common_dfa_struct
+from .__internal.dfa_to_cpp import aalpy_dfa_to_cpp
 from .__internal.eq_oracles import (
-    WpSpec,
-    RandomWpSpec,
-    StatePrefixSpec,
     EqOracleList,
     EqOracleSpec,
+    RandomWpSpec,
+    StatePrefixSpec,
+    WpSpec,
 )
+from .__internal.fullmatch import validate_fullmatch_pattern
+from .__internal.get_version import get_version
 from .__internal.learn_dfa import (
     CliCexProcessingList,
     KVLearnConfig,
@@ -28,15 +24,19 @@ from .__internal.learn_dfa import (
     LStarClosingStrategyList,
     LStarLearnConfig,
     learn_dfa,
-    normalize_lstar_cex_processing,
     normalize_kv_cex_processing,
+    normalize_lstar_cex_processing,
 )
-from .__internal.regex_to_dfa import regex_to_dfa
-from .__internal.dfa_to_cpp import aalpy_dfa_to_cpp
-from .__internal.cpp_common_dfa_struct import common_dfa_struct
-from .__internal.re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
-from .__internal.fullmatch import validate_fullmatch_pattern
+from .__internal.learning_property import (
+    CustomEqOracleFactoryAttrs,
+    load_learning_property,
+)
 from .__internal.main_args import MainArgs
+from .__internal.names import DIST_NAME
+from .__internal.re_pattern import KEY_PATTERN, NAMESPACE_PATTERN
+from .__internal.regex_property import load_regex_property
+from .__internal.regex_to_dfa import regex_to_dfa
+from .__internal.shtab_helper import set_shtab_complete
 
 
 def main() -> int:

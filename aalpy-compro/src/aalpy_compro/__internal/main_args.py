@@ -1,15 +1,15 @@
+import re
 from dataclasses import dataclass
 from typing import Literal, TypeAlias
-import re
 
 from .eq_oracles import EqOracleLiteral
+from .fullmatch import validate_fullmatch_pattern
 from .learn_dfa import (
     CliCexProcessingLiteral,
     LearnAlgorithmLiteral,
     LStarClosingStrategyLiteral,
 )
-from .re_pattern import NAMESPACE_PATTERN, KEY_PATTERN
-from .fullmatch import validate_fullmatch_pattern
+from .re_pattern import KEY_PATTERN, NAMESPACE_PATTERN
 
 RunKind: TypeAlias = Literal["learn", "regex", "common"]
 

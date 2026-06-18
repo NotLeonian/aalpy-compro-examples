@@ -5,9 +5,9 @@ from typing import Generic, TypeVar
 
 from aalpy.automata import Dfa
 
-from .validation_for_aalpy import validate_aalpy_alphabet
+from ..regex import ComplementRegex, Regex
 from .missing_symbol_payload import MissingSymbolPayload
-from ..regex import Regex, ComplementRegex
+from .validation_for_aalpy import validate_aalpy_alphabet
 
 T = TypeVar("T", bound=Hashable)
 

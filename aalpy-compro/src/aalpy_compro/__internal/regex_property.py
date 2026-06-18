@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from importlib.util import module_from_spec, spec_from_file_location
 from typing import Generic, TypeVar, cast
 
+from ..regex import ComplementRegex, Regex
 from .normalize_alphabet import normalize_alphabet
-from ..regex import Regex, ComplementRegex
 
 T = TypeVar("T", bound=Hashable)
 
