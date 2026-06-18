@@ -1,8 +1,7 @@
 #!/usr/bin/env -S uv run
-from pathlib import Path
 import subprocess
 import sys
-
+from pathlib import Path
 
 output_filename = "learned_dfa.cpp"
 property_filename = "property.py"

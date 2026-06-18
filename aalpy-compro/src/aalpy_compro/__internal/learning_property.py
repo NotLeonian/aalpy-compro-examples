@@ -1,9 +1,9 @@
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass
-from importlib.util import spec_from_file_location, module_from_spec
+from importlib.util import module_from_spec, spec_from_file_location
 from typing import Generic, TypeAlias, TypeVar, cast
 
-from .normalize_alphabet import require_hashable, normalize_alphabet
+from .normalize_alphabet import normalize_alphabet, require_hashable
 
 T = TypeVar("T", bound=Hashable)
 

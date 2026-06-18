@@ -1,5 +1,5 @@
-from .errors import LearningError, ConstraintViolationError
-from .regex import Regex, ComplementRegex
+from .errors import ConstraintViolationError, LearningError
+from .regex import ComplementRegex, Regex
 
 __all__ = [
     "LearningError",

@@ -1,16 +1,16 @@
 from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass
-from typing import Literal, TypeAlias, TypeVar, Any, cast
+from typing import Any, Literal, TypeAlias, TypeVar, cast
 
 from aalpy.automata import Dfa
-from aalpy.base import Oracle, SUL
-from aalpy.learning_algs import run_Lstar, run_KV
+from aalpy.base import SUL, Oracle
+from aalpy.learning_algs import run_KV, run_Lstar
 
-from .validation_for_aalpy import validate_aalpy_alphabet
-from .eq_oracles import WpSpec, EqOracleSpec, build_eq_oracle
+from ..errors import ConstraintViolationError
+from .eq_oracles import EqOracleSpec, WpSpec, build_eq_oracle
 from .learning_property import WordFactory
 from .prefix_accepting_sul import PrefixAcceptingSUL
-from ..errors import ConstraintViolationError
+from .validation_for_aalpy import validate_aalpy_alphabet
 
 T = TypeVar("T", bound=Hashable)
 

@@ -24,7 +24,7 @@ from collections.abc import Hashable, Sequence
 from typing import Generic, TypeVar
 
 from aalpy.automata import Dfa
-from aalpy.base import Oracle, SUL
+from aalpy.base import SUL, Oracle
 
 from .learning_property import WordFactory
 

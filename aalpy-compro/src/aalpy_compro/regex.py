@@ -3,14 +3,14 @@ from collections.abc import Hashable, Iterable
 from dataclasses import dataclass, field
 from typing import Generic, Self, SupportsIndex, TypeVar
 
+from .__internal.missing_symbol_payload import (
+    MISSING_SYMBOL_PAYLOAD,
+    MissingSymbolPayload,
+)
 from .__internal.regex_kind import (
     RegexKindLiteral,
-    regex_kind_precedence,
     parenthesize_text,
-)
-from .__internal.missing_symbol_payload import (
-    MissingSymbolPayload,
-    MISSING_SYMBOL_PAYLOAD,
+    regex_kind_precedence,
 )
 
 T = TypeVar("T", bound=Hashable)

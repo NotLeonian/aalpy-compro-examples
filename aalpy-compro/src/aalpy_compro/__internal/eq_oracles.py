@@ -2,12 +2,12 @@ from collections.abc import Hashable, Sequence
 from dataclasses import dataclass, field
 from typing import Literal, TypeAlias, TypeVar
 
-from aalpy.base import Oracle, SUL
-from aalpy.oracles import WpMethodEqOracle, RandomWpMethodEqOracle, StatePrefixEqOracle
+from aalpy.base import SUL, Oracle
+from aalpy.oracles import RandomWpMethodEqOracle, StatePrefixEqOracle, WpMethodEqOracle
 
-from .validation_for_aalpy import wrap_fixed_eq_word_factory_for_aalpy
-from .learning_property import WordFactory
 from .custom_eq_oracles import ChainedEqOracle, FixedWordsEqOracle
+from .learning_property import WordFactory
+from .validation_for_aalpy import wrap_fixed_eq_word_factory_for_aalpy
 
 EqOracle: TypeAlias = Oracle
 EqOracleList: list[str] = ["wp", "random_wp", "state_prefix"]
