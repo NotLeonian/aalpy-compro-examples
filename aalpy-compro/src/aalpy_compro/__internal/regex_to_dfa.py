@@ -60,7 +60,7 @@ def regex_to_nfa(
     alphabet: Sequence[T],
 ) -> Nfa[T]:
     """
-    Thompson's construction
+    Thompson’s construction
 
     `Regex.dot()` は、引数 alphabet 上の 1 文字全体として展開される。
     """
