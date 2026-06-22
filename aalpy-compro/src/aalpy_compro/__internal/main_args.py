@@ -74,7 +74,7 @@ class MainArgs:
 
         if self.key is None:
             if self.kind == "learn" or self.kind == "regex":
-                raise ValueError(f'When --kind is "{self.kind}", --key is required.')
+                raise ValueError(f"When --kind is \"{self.kind}\", --key is required.")
         else:
             raise_value_error_if_non_fullmatch(
                 pattern=KEY_PATTERN,

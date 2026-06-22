@@ -47,17 +47,17 @@ def render_cpp(
     res.append(f"inline constexpr int INITIAL_STATE = {initial_state};")
     res.append("")
     res.append("inline constexpr std::array<unsigned char, N> ACCEPTING = {{")
-    res.append(f"    {', '.join(map(str, accepting))}")
+    res.append(f"""    {", ".join(map(str, accepting))}""")
     res.append("}};")
     res.append("")
     res.append("inline constexpr std::array<std::array<int, SIGMA>, N> TRANS = {{")
     for row in trans_table:
-        res.append(f"    {{{{{', '.join(map(str, row))}}}}},")
+        res.append(f"""    {{{{{", ".join(map(str, row))}}}}},""")
     res.append("}};")
     res.append("")
     res.append(f"static const int __{namespace}_register_{key} = [] {{")
     res.append(
-        f'    {namespace}::dfas().register_dfa(INITIAL_STATE, ACCEPTING, TRANS, "{key}");'
+        f"    {namespace}::dfas().register_dfa(INITIAL_STATE, ACCEPTING, TRANS, \"{key}\");"
     )
     res.append("    return 0;")
     res.append("}();")

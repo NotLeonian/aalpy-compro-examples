@@ -79,7 +79,7 @@ def build_base_eq_oracle(
             depth_first=spec.depth_first,
         )
 
-    raise ValueError(f"Unknown spec.kind: {getattr(spec, 'kind', None)}")
+    raise ValueError(f"""Unknown spec.kind: {getattr(spec, "kind", None)}""")
 
 
 def build_eq_oracle(

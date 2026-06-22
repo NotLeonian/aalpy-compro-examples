@@ -78,7 +78,7 @@ def main() -> int:
     parser.add_argument(
         "--kind",
         choices=["learn", "regex", "common"],
-        help='Select "learn", "regex", or "common" (default: "learn").',
+        help="Select \"learn\", \"regex\", or \"common\" (default: \"learn\").",
         default="learn",
     )
     set_shtab_complete(
@@ -123,7 +123,7 @@ def main() -> int:
         help="\n".join(
             [
                 f"--key must match /{KEY_PATTERN.pattern}/.",
-                'When --kind is "learn" or "regex", effectively required.',
+                "When --kind is \"learn\" or \"regex\", effectively required.",
                 "Each name should be unique.",
             ]
         ),
