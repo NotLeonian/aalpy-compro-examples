@@ -27,3 +27,12 @@ end_of_line = unset
 charset = unset
 trim_trailing_whitespace = unset
 insert_final_newline = unset
+
+# Shell
+[*.{sh,bash,zsh}]
+indent_size = 2
+
+# Windows scripts
+[*.{bat,cmd,ps1}]
+indent_size = 2
+end_of_line = crlf
