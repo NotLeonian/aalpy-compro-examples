@@ -97,5 +97,5 @@
 ac-library/** linguist-vendored -text -eol
 
 # Generated files
-example/*.cpp    linguist-generated -text -eol whitespace=-blank-at-eol
-example/**/*.cpp linguist-generated -text -eol whitespace=-blank-at-eol
+examples/*.cpp    linguist-generated -text -eol whitespace=-blank-at-eol
+examples/**/*.cpp linguist-generated -text -eol whitespace=-blank-at-eol
