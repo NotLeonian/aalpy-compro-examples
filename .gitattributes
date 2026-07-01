@@ -57,9 +57,9 @@
 *.pyd   binary
 
 # Shell
-*.sh    text
-*.bash  text
-*.zsh   text
+*.sh    text diff=bash
+*.bash  text diff=bash
+*.zsh   text diff=bash
 
 # Windows scripts
 *.bat   text eol=crlf
