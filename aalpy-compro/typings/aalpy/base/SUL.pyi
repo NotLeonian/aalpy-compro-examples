@@ -1,0 +1,39 @@
+from abc import ABC, abstractmethod
+from typing import Any
+
+class SUL(ABC):
+    num_queries: int
+    num_steps: int
+    num_cached_queries: int
+
+    def __init__(self) -> None: ...
+    def query(self, word: tuple[Any, ...]) -> list[Any]: ...
+    def io_query(
+        self,
+        word: tuple[Any, ...],
+    ) -> list[tuple[Any, Any]]: ...
+    def adaptive_query(
+        self,
+        word: list[Any],
+        ads: Any,
+    ) -> tuple[list[Any], list[Any]]: ...
+    @abstractmethod
+    def pre(self) -> None: ...
+    @abstractmethod
+    def post(self) -> None: ...
+    @abstractmethod
+    def step(self, letter: Any) -> Any: ...
+
+class CacheSUL(SUL):
+    sul: SUL
+    cache: Any
+
+    def __init__(
+        self,
+        sul: SUL,
+        cache_type: str = "tree",
+    ) -> None: ...
+    def query(self, word: tuple[Any, ...]) -> list[Any]: ...
+    def pre(self) -> None: ...
+    def post(self) -> None: ...
+    def step(self, letter: Any) -> Any: ...

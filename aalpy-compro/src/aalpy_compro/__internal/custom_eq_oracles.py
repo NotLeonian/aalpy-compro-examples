@@ -61,7 +61,7 @@ class ChainedEqOracle(Oracle, Generic[T]):
             cex = oracle.find_cex(hypothesis)
             self.pull_stats(oracle)
             if cex is not None:
-                return cex
+                return tuple(cex)
 
         return None
 

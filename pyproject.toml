@@ -30,6 +30,7 @@ exclude = [
     "ac-library",
 ]
 pythonVersion = "3.11"
+stubPath = "aalpy-compro/typings"
 
 [tool.ruff]
 extend-exclude = ["ac-library"]
