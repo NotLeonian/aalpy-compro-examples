@@ -27,10 +27,28 @@ dependencies = [
     { name = "shtab" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "hatch" },
+    { name = "mypy" },
+    { name = "pyright" },
+    { name = "ruff" },
+    { name = "uv" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "aalpy", specifier = ">=1.5.3" },
     { name = "shtab", specifier = ">=1.8.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "hatch", specifier = ">=1.16.5" },
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "pyright", specifier = ">=1.1.408" },
+    { name = "ruff", specifier = ">=0.15.6" },
+    { name = "uv", specifier = ">=0.11.25" },
 ]
 
 [[package]]
