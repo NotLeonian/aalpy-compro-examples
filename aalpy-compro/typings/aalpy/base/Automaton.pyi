@@ -2,6 +2,18 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from typing import Any, Generic, TypeVar
 
+from ._typevars import _InputType as InputType
+from ._typevars import _OutputType as OutputType
+
+# AALpy's automata modules import InputType and OutputType from this module.
+__all__ = [
+    "Automaton",
+    "AutomatonState",
+    "DeterministicAutomaton",
+    "InputType",
+    "OutputType",
+]
+
 class AutomatonState(ABC):
     state_id: Any
     transitions: Any
