@@ -153,8 +153,8 @@ def load_learning_property(path: str) -> LearningProperty[Hashable]:
     if not hasattr(mod, "accepts"):
         raise ValueError(f"`accepts` must be defined in {path}.")
 
-    raw_alphabet = getattr(mod, "alphabet")
-    raw_accepts = getattr(mod, "accepts")
+    raw_alphabet = mod.alphabet
+    raw_accepts = mod.accepts
     raw_symbol_to_label = getattr(mod, "symbol_to_label", str)
 
     if not callable(raw_accepts):

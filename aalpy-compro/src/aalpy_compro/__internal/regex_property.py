@@ -38,8 +38,8 @@ def load_regex_property(path: str) -> RegexProperty[Hashable]:
     if not hasattr(mod, "regex"):
         raise ValueError(f"`regex` must be defined in {path}.")
 
-    raw_alphabet = getattr(mod, "alphabet")
-    regex = getattr(mod, "regex")
+    raw_alphabet = mod.alphabet
+    regex = mod.regex
     raw_symbol_to_label = getattr(mod, "symbol_to_label", str)
 
     if not isinstance(regex, (Regex, ComplementRegex)):

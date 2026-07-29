@@ -561,6 +561,6 @@ class ComplementRegex(Generic[T]):
 
 
 __all__ = [
-    "Regex",
     "ComplementRegex",
+    "Regex",
 ]

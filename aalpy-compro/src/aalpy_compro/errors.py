@@ -30,6 +30,6 @@ class ConstraintViolationError(LearningError, ValueError):
 
 
 __all__ = [
-    "LearningError",
     "ConstraintViolationError",
+    "LearningError",
 ]
