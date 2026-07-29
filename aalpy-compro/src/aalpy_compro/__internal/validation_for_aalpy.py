@@ -32,12 +32,12 @@ def validate_aalpy_word(
     source_name: str,
 ) -> tuple[T, ...]:
     if isinstance(raw_word, (str, bytes)):
-        raise ValueError(
+        raise TypeError(
             f"{source_name} must be a non-string iterable of input symbols."
         )
 
     if not isinstance(raw_word, Iterable):
-        raise ValueError(
+        raise TypeError(
             f"{source_name} must be a non-string iterable of input symbols."
         )
 
@@ -74,7 +74,7 @@ def wrap_fixed_eq_word_factory_for_aalpy(
     def wrapped_factory() -> Iterable[tuple[T, ...]]:
         produced = fixed_eq_word_factory()
         if not isinstance(produced, Iterable) or isinstance(produced, (str, bytes)):
-            raise ValueError(
+            raise TypeError(
                 "`fixed_eq_word_factory()` must return a non-string iterable of words."
             )
 

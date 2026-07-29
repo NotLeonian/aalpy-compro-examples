@@ -149,9 +149,11 @@ class Regex(Generic[T]):
             if left._kind != right._kind:
                 return False
 
-            if left._kind == "symbol":
-                if left.require_symbol_payload() != right.require_symbol_payload():
-                    return False
+            if (
+                left._kind == "symbol"
+                and left.require_symbol_payload() != right.require_symbol_payload()
+            ):
+                return False
 
             if len(left._parts) != len(right._parts):
                 return False
@@ -368,7 +370,7 @@ class Regex(Generic[T]):
             raise ValueError("This regex node does not carry a symbol payload.")
         payload = self._symbol
         if isinstance(payload, MissingSymbolPayload):
-            raise AssertionError("Symbol regex must carry `_symbol`.")
+            raise TypeError("Symbol regex must carry `_symbol`.")
         return payload
 
     def ensure_acyclic(self) -> None:
@@ -561,6 +563,6 @@ class ComplementRegex(Generic[T]):
 
 
 __all__ = [
-    "Regex",
     "ComplementRegex",
+    "Regex",
 ]
