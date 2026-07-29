@@ -71,3 +71,15 @@ aalpy-compro では、語を表現するために各文字のリストなどで�
 
 ### 使用方法の詳細について
 `examples/` 内のソースコードおよびドキュメントを参考にしてください。
+
+## 開発者向け
+### Python checks
+Python ソースコードのフォーマットと静的検査には以下のコマンドを使用できます。
+
+```sh
+uv run ruff format .
+uv run ruff check .
+uv run pyright
+uv run mypy ./aalpy-compro
+find examples -mindepth 1 -maxdepth 1 -type d -exec sh -c 'for dir in "$@"; do python_source=$(find "$dir" -type f -name "*.py" -print -quit) || exit; [ -n "$python_source" ] || continue; printf "%s\n" "$dir"; uv run mypy "$dir" || exit; done' sh {} +
+```
