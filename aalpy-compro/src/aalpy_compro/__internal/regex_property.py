@@ -43,11 +43,11 @@ def load_regex_property(path: str) -> RegexProperty[Hashable]:
     raw_symbol_to_label = getattr(mod, "symbol_to_label", str)
 
     if not isinstance(regex, (Regex, ComplementRegex)):
-        raise ValueError(
+        raise TypeError(
             f"`regex` must be an instance of `aalpy_compro.regex.Regex` or `aalpy_compro.regex.ComplementRegex` in {path}."
         )
     if not callable(raw_symbol_to_label):
-        raise ValueError(f"`symbol_to_label` must be callable in {path}.")
+        raise TypeError(f"`symbol_to_label` must be callable in {path}.")
 
     alphabet = normalize_alphabet(raw_alphabet, path=path)
     symbol_to_label = cast(Callable[[Hashable], str], raw_symbol_to_label)

@@ -16,13 +16,13 @@ def iter_words(
     attr_name: str,
 ) -> Iterator[tuple[T, ...]]:
     if isinstance(raw, (str, bytes)):
-        raise ValueError(
+        raise TypeError(
             f"`{attr_name}` must be a non-string iterable of non-string iterables."
         )
 
     for word_index, word in enumerate(raw):
         if isinstance(word, (str, bytes)):
-            raise ValueError(
+            raise TypeError(
                 f"`{attr_name}` must be a non-string iterable of non-string iterables."
             )
         try:
@@ -87,7 +87,7 @@ def load_word_factory(
         def factory_with_iter_words() -> Iterable[tuple[T, ...]]:
             produced = iter_words_fn()
             if not isinstance(produced, Iterable) or isinstance(produced, (str, bytes)):
-                raise ValueError(
+                raise TypeError(
                     f"`{iter_words_attr}()` must return a non-string iterable of non-string iterables."
                 )
             return iter_words(produced, attr_name=f"{iter_words_attr}()")
@@ -108,16 +108,16 @@ class LearningProperty(Generic[T]):
         if not isinstance(self.alphabet, Sequence) or isinstance(
             self.alphabet, (str, bytes)
         ):
-            raise ValueError("`alphabet` must be a non-string sequence.")
+            raise TypeError("`alphabet` must be a non-string sequence.")
 
         for i, symbol in enumerate(self.alphabet):
             require_hashable(symbol, obj_name=f"`alphabet[{i}]`")
 
         if not callable(self.accepts):
-            raise ValueError("`accepts` must be callable.")
+            raise TypeError("`accepts` must be callable.")
 
         if not callable(self.symbol_to_label):
-            raise ValueError("`symbol_to_label` must be callable.")
+            raise TypeError("`symbol_to_label` must be callable.")
 
         if self.fixed_eq_word_factory is not None and not callable(
             self.fixed_eq_word_factory
@@ -158,9 +158,9 @@ def load_learning_property(path: str) -> LearningProperty[Hashable]:
     raw_symbol_to_label = getattr(mod, "symbol_to_label", str)
 
     if not callable(raw_accepts):
-        raise ValueError(f"`accepts` must be callable in {path}.")
+        raise TypeError(f"`accepts` must be callable in {path}.")
     if not callable(raw_symbol_to_label):
-        raise ValueError(f"`symbol_to_label` must be callable in {path}.")
+        raise TypeError(f"`symbol_to_label` must be callable in {path}.")
 
     alphabet = normalize_alphabet(raw_alphabet, path=path)
     accepts = cast(Callable[[tuple[Hashable, ...]], bool], raw_accepts)

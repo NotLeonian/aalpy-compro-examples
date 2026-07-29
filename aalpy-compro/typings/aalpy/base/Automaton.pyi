@@ -2,9 +2,6 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from typing import Any, Generic, TypeVar
 
-InputType = TypeVar("InputType")
-OutputType = TypeVar("OutputType")
-
 class AutomatonState(ABC):
     state_id: Any
     transitions: Any
@@ -14,18 +11,18 @@ class AutomatonState(ABC):
     def get_diff_state_transitions(self) -> list[Any]: ...
     def get_same_state_transitions(self) -> list[Any]: ...
 
-AutomatonStateType = TypeVar("AutomatonStateType", bound=AutomatonState)
+_AutomatonStateType = TypeVar("_AutomatonStateType", bound=AutomatonState)
 
-class Automaton(ABC, Generic[AutomatonStateType]):
-    initial_state: AutomatonStateType
-    states: list[AutomatonStateType]
+class Automaton(ABC, Generic[_AutomatonStateType]):
+    initial_state: _AutomatonStateType
+    states: list[_AutomatonStateType]
     characterization_set: list[Any]
-    current_state: AutomatonStateType
+    current_state: _AutomatonStateType
 
     def __init__(
         self,
-        initial_state: AutomatonStateType,
-        states: list[AutomatonStateType],
+        initial_state: _AutomatonStateType,
+        states: list[_AutomatonStateType],
     ) -> None: ...
     @property
     def size(self) -> int: ...
@@ -34,14 +31,14 @@ class Automaton(ABC, Generic[AutomatonStateType]):
     def step(self, letter: Any) -> Any: ...
     def is_input_complete(self) -> bool: ...
     def get_input_alphabet(self) -> list[Any]: ...
-    def get_state_by_id(self, state_id: Any) -> AutomatonStateType | None: ...
+    def get_state_by_id(self, state_id: Any) -> _AutomatonStateType | None: ...
     def make_input_complete(
         self,
         missing_transition_go_to: str = "self_loop",
     ) -> None: ...
     def execute_sequence(
         self,
-        origin_state: AutomatonStateType,
+        origin_state: _AutomatonStateType,
         seq: Iterable[Any],
     ) -> list[Any]: ...
     def save(
@@ -63,32 +60,32 @@ class Automaton(ABC, Generic[AutomatonStateType]):
     ) -> Automaton: ...
     @abstractmethod
     def to_state_setup(self) -> dict[Any, Any]: ...
-    def copy(self) -> Automaton[AutomatonStateType]: ...
+    def copy(self) -> Automaton[_AutomatonStateType]: ...
     def __reduce__(self) -> tuple[Any, tuple[dict[Any, Any]]]: ...
 
-class DeterministicAutomaton(Automaton[AutomatonStateType]):
+class DeterministicAutomaton(Automaton[_AutomatonStateType]):
     @abstractmethod
     def step(self, letter: Any) -> Any: ...
     def get_shortest_path(
         self,
-        origin_state: AutomatonStateType,
-        target_state: AutomatonStateType,
+        origin_state: _AutomatonStateType,
+        target_state: _AutomatonStateType,
     ) -> tuple[Any, ...] | None: ...
     def is_strongly_connected(self) -> bool: ...
     def output_step(
         self,
-        state: AutomatonStateType,
+        state: _AutomatonStateType,
         letter: Any,
     ) -> Any: ...
     def find_distinguishing_seq(
         self,
-        state1: AutomatonStateType,
-        state2: AutomatonStateType,
+        state1: _AutomatonStateType,
+        state2: _AutomatonStateType,
         alphabet: Iterable[Any],
     ) -> list[Any] | None: ...
     def compute_output_seq(
         self,
-        state: AutomatonStateType,
+        state: _AutomatonStateType,
         sequence: Sequence[Any],
     ) -> list[Any]: ...
     def is_minimal(self) -> bool: ...
@@ -102,9 +99,9 @@ class DeterministicAutomaton(Automaton[AutomatonStateType]):
     ) -> Any: ...
     def _split_blocks(
         self,
-        blocks: list[list[AutomatonStateType]],
+        blocks: list[list[_AutomatonStateType]],
         seq: Sequence[Any],
-    ) -> list[list[AutomatonStateType]]: ...
+    ) -> list[list[_AutomatonStateType]]: ...
     def compute_prefixes(self) -> None: ...
     def minimize(self) -> None: ...
     def __eq__(self, other: object) -> bool: ...
