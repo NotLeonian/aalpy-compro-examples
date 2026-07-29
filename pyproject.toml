@@ -24,6 +24,7 @@ quote-style = "preserve"
 extend-select = ["I"]
 
 [tool.uv]
+required-version = ">=0.11.25"
 preview-features = ["centralized-project-envs"]
 
 [tool.uv.workspace]
