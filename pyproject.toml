@@ -17,6 +17,23 @@ dev = [
     "uv>=0.11.25",
 ]
 
+[tool.mypy]
+exclude = ["ac-library"]
+python_version = "3.11"
+
+[tool.pyright]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    ".venv",
+    "ac-library",
+]
+pythonVersion = "3.11"
+
+[tool.ruff]
+extend-exclude = ["ac-library"]
+
 [tool.ruff.format]
 quote-style = "preserve"
 
