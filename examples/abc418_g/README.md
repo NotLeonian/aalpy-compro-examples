@@ -1,11 +1,15 @@
 # examples/abc418_g
+
 ## 問題
+
 [AtCoder Beginner Contest 418 G - Binary Operation](https://atcoder.jp/contests/abc418/tasks/abc418_g)
 
 以降、このドキュメントではこの問題を「ABC418-G」と呼ぶ。
 
 ## 使用方法
+
 ### 素朴な accepts 判定関数の記述
+
 [property.py.tmpl](./property.py.tmpl) に `alphabet` と `accepts` 関数を Python で記述する。
 
 > [!NOTE]
@@ -24,6 +28,7 @@
 最初から property.py.tmpl を書こうとするよりも、たとえば property_1001.py を先に書き、後から汎用化した property.py.tmpl を作るほうがストレスが少ない。
 
 ### 学習を実行するスクリプトの記述
+
 16 通りの学習をする必要があるため、スクリプト [run.py](./run.py) を用意している。  
 もちろん、全て手で実行してもよい。
 
@@ -36,18 +41,20 @@
 また、`learn_args` 関数内の `["--max-states", str(7)]` の `7` は DFA の状態数の上界であり、適切に設定する必要がある。
 
 > [!NOTE]
->デフォルトの設定で学習が上手くいかなければ `learn_args` 関数内の `["--oracle", "wp"]` を、`"random_wp"` または `"state_prefix"` に変更することも手である。  
+> デフォルトの設定で学習が上手くいかなければ `learn_args` 関数内の `["--oracle", "wp"]` を、`"random_wp"` または `"state_prefix"` に変更することも手である。  
 > ただし、その場合は他のオプションも適切に追加・変更・削除する必要がある（上級者向け）。
 
 C++ の記述の順序の関係から、必ず `write(learn_args(key=key, property_path=property_path))` よりも先に `write(common_args())` が呼び出されるようにすること。
 
 ### 学習の実行
+
 shebang を書いているので、bash や zsh などであればそのまま `./run.py` でよい。  
 そうでない環境では、`uv run run.py` を推奨する。
 
 [learned_dfa.cpp](./learned_dfa.cpp) が生成される。
 
 ### main 関数などの追加
+
 learned_dfa.cpp には main 関数などがないため、ジャッジ環境に提出できるようにこちらで追加する必要がある。
 
 `learned_dfa::dfas().get(key)` で `key` をキーとする DFA が得られる。
@@ -60,7 +67,9 @@ learned_dfa.cpp に main 関数などを追加したのが [refined_solution.cpp
 > refined_solution.cpp では、learned_dfa.cpp に `to_index` 関数と `main` 関数を追加するだけでなく、`iostream` のインクルードや clang-format によるフォーマットも行っている。
 
 ### コンパイル・実行
+
 GCC の場合、以下のようなコンパイルコマンドを想定している。
+
 ```bash
 g++ -std=gnu++17 refined_solution.cpp
 ```
@@ -69,8 +78,10 @@ g++ -std=gnu++17 refined_solution.cpp
 もちろん PR などを出す気がなく、クローンして使いたいだけであれば特に問題はない。
 
 ### 提出
+
 GCC または Clang で、C++17 以上を選択することを推奨する。  
 C++17 ぴったりを選択する必要はない。
 
 ## 提出結果
+
 [AC 提出 (C++23 (GCC 15.2.0), 81 ms)](https://atcoder.jp/contests/abc418/submissions/73990647)

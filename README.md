@@ -1,7 +1,9 @@
 # aalpy-compro-examples
+
 Examples of solving competitive programming problems with automata learning using AALpy
 
 ## これは？
+
 能動オートマトン学習を用いて解ける競技プログラミングの問題について、AALpy の学習結果を C++ のソースコードに変換するツール **aalpy-compro** とその使用例を公開するリポジトリです。
 
 また、aalpy-compro には正規表現から等価な最小 DFA に変換する補助機能も含まれています。  
@@ -17,10 +19,13 @@ aalpy-compro はコンテスト中であってもある程度使いやすいよ�
 > The repository author (@NotLeonian) believes that AALpy does not fall under the category of “generative AI” as defined by rules such as the “AtCoder Rules against Generative AI - Version 20251003” ([ja](https://info.atcoder.jp/entry/llm-rules-ja) / [en](https://info.atcoder.jp/entry/llm-rules-en)); however, **if you intend to use it during a contest, it is recommended that you check that contest’s rules regarding generative AI in advance and familiarize yourself beforehand with active automata learning and AALpy.**
 
 ## 推奨環境
+
 ### aalpy-compro および examples
+
 uv 0.11.25 以上が必要です。
 
 ### 生成された C++ コードを動作させる環境
+
 aalpy-compro は C++ のソースコードの一部を出力します。  
 使用者が適切に `main` 関数などを追記したうえで、 GCC または Clang でコンパイルすることを想定しています。  
 その際、コンパイルオプションで `-std=gnu++17` を指定することを仮定しています。  
@@ -30,6 +35,7 @@ aalpy-compro は C++ のソースコードの一部を出力します。
 > **C++17 以上に対応していないジャッジ環境においては、生成されたコードの一部の記述を修正しないとコンパイルエラーになる可能性があります。**
 
 ## インストール
+
 1. uv 0.11.25 以上をインストールする（インストール済みの uv が古い場合はアップグレードする）。
 1. このリポジトリをクローンする。
 1. プロジェクトルートで `uv sync` をする。
@@ -37,7 +43,9 @@ aalpy-compro は C++ のソースコードの一部を出力します。
 uv の設定によっては、`uv python install` 等の他のコマンドの実行も必要になるかもしれません。
 
 ## 使用方法について
+
 ### 使用方法の軽い説明
+
 `uv run aalpy-compro ...` を実行します（`...` の部分でコマンドライン引数を指定）。  
 venv 環境を使えば `aalpy-compro` コマンドを使用することも可能です（上級者向け）。
 
@@ -70,10 +78,13 @@ aalpy-compro では、語を表現するために各文字のリストなどで�
 なお、`regex` を定義するために `aalpy_compro` から `Regex` を import する必要があります（基本的には `Regex` のみで十分ですが、`ComplementRegex` の import も必要になるかもしれません）。
 
 ### 使用方法の詳細について
+
 `examples/` 内のソースコードおよびドキュメントを参考にしてください。
 
 ## 開発者向け
+
 ### Python checks
+
 Python ソースコードのフォーマットと静的検査には以下のコマンドを使用できます。
 
 ```sh
