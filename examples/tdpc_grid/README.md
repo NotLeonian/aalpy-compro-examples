@@ -1,11 +1,15 @@
 # examples/tdpc_grid
+
 ## 問題
+
 [Typical DP Contest S - マス目](https://atcoder.jp/contests/tdpc/tasks/tdpc_grid)
 
 以降、このドキュメントではこの問題を「TDPC-S」と呼ぶ。
 
 ## 使用方法
+
 ### 素朴な accepts 判定関数の記述
+
 [property.py.tmpl](./property.py.tmpl) に `alphabet` と `accepts` 関数を Python で記述する。
 
 > [!NOTE]
@@ -24,6 +28,7 @@
 また、この問題は明らかに $H=5,6$ の学習の難易度が高いため、 $H=5,6$ は手で行うのもよい。
 
 ### 学習を実行するスクリプトの記述
+
 5 通りの学習をする必要があるため、スクリプト [run.py](./run.py) を用意している。  
 もちろん、全て手で実行してもよい。
 
@@ -35,7 +40,7 @@
 
 そして、`max_states` は各最小 DFA の状態数の上界である。  
 実際の最小 DFA の状態数よりも小さい値を指定すると、DFA は正しく学習されない。  
-この [run.py](./run.py) では実際の最小 DFA の状態数を指定しているが、もしコンテスト中に使うのであれば実際の最小 DFA の状態数はわからないと考えたほうがよい。  
+この [run.py](./run.py) では実際の最小 DFA の状態数を指定しているが、もしコンテスト中に使うのであれば実際の最小 DFA の状態数はわからないと考えたほうがよい。
 
 TDPC-S は数え上げなので、正しい DFA が得られているかどうかはわかりやすい。  
 したがって、特に $H=5,6$ については正しい DFA が得られるまで徐々に `max_states` を大きくしていくことも考えられる。  
@@ -48,12 +53,14 @@ TDPC-S は数え上げなので、正しい DFA が得られているかどう�
 生成については、C++ の記述の順序の関係から、必ず `write(learn_args(key=key, property_path=property_path, max_states=max_states[h]))` よりも先に `write(common_args())` が呼び出されるようにすること。
 
 ### 学習の実行
+
 shebang を書いているので、bash や zsh などであればそのまま `./run.py` でよい。  
 そうでない環境では、`uv run run.py` を推奨する。
 
 [learned_dfa.cpp](./learned_dfa.cpp) が生成される。
 
 ### main 関数などの追加
+
 learned_dfa.cpp には main 関数などがないため、ジャッジ環境に提出できるようにこちらで追加する必要がある。
 
 `learned_dfa::dfas().get(key)` で `key` をキーとする DFA が得られる。
@@ -77,7 +84,9 @@ aalpy-compro では、状態 $i$ から状態 $j$ に遷移する入力文字の
 > refined_solution.cpp では、learned_dfa.cpp に `main` 関数などを追加するだけでなく、標準ライブラリの追加のインクルードや clang-format によるフォーマットも行っている。
 
 ### コンパイル・実行
+
 GCC の場合、以下のようなコンパイルコマンドを想定している。
+
 ```bash
 g++ -std=gnu++17 -I ../../ac-library refined_solution.cpp
 ```
@@ -86,8 +95,10 @@ g++ -std=gnu++17 -I ../../ac-library refined_solution.cpp
 もちろん PR などを出す気がなく、クローンして使いたいだけであれば特に問題はない。
 
 ### 提出
+
 GCC または Clang で、C++17 以上を選択することを推奨する。  
 C++17 ぴったりを選択する必要はない。
 
 ## 提出結果
+
 [AC 提出 (C++23 (GCC 15.2.0), 2 ms)](https://atcoder.jp/contests/tdpc/submissions/74190550)

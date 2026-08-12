@@ -1,9 +1,13 @@
 # examples/abc424_d
+
 ## 問題
+
 [AtCoder × Engineer Guild オンサイトコンテスト ～集結！高レート人材～予選（AtCoder Beginner Contest 424） D - 2x2 Erasing 2](https://atcoder.jp/contests/abc424/tasks/abc424_d)
 
 ## 使用方法
+
 ### 素朴な accepts 判定関数などの記述
+
 [property.py.tmpl](./property.py.tmpl) に `alphabet` と `accepts` 関数を Python で記述する。
 
 > [!NOTE]
@@ -30,6 +34,7 @@ aalpy-compro が自前実装している `FixedWordsEqOracle` によるオート
 最初から property.py.tmpl を書こうとするよりも、たとえば property_7.py を先に書き、後から汎用化した property.py.tmpl を作るほうがストレスが少ない。
 
 ### 学習を実行するスクリプトの記述
+
 6 通りの学習をする必要があるため、スクリプト [run.py](./run.py) を用意している。  
 もちろん、全て手で実行してもよい。
 
@@ -46,12 +51,14 @@ aalpy-compro が自前実装している `FixedWordsEqOracle` によるオート
 生成については、C++ の記述の順序の関係から、必ず `write(learn_args(key=key, property_path=property_path))` よりも先に `write(common_args())` が呼び出されるようにすること。
 
 ### 学習の実行
+
 shebang を書いているので、bash や zsh などであればそのまま `./run.py` でよい。  
 そうでない環境では、`uv run run.py` を推奨する。
 
 [learned_dfa.cpp](./learned_dfa.cpp) が生成される。
 
 ### main 関数などの追加
+
 learned_dfa.cpp には main 関数などがないため、ジャッジ環境に提出できるようにこちらで追加する必要がある。
 
 `learned_dfa::dfas().get(key)` で `key` をキーとする DFA が得られる。
@@ -65,7 +72,9 @@ learned_dfa.cpp に main 関数などを追加したのが [refined_solution.cpp
 > refined_solution.cpp では、learned_dfa.cpp に `main` 関数を追加するだけでなく、標準ライブラリの追加のインクルードや clang-format によるフォーマットも行っている。
 
 ### コンパイル・実行
+
 GCC の場合、以下のようなコンパイルコマンドを想定している。
+
 ```bash
 g++ -std=gnu++17 refined_solution.cpp
 ```
@@ -74,8 +83,10 @@ g++ -std=gnu++17 refined_solution.cpp
 もちろん PR などを出す気がなく、クローンして使いたいだけであれば特に問題はない。
 
 ### 提出
+
 GCC または Clang で、C++17 以上を選択することを推奨する。  
 C++17 ぴったりを選択する必要はない。
 
 ## 提出結果
+
 [AC 提出 (C++23 (GCC 15.2.0), 20 ms)](https://atcoder.jp/contests/abc424/submissions/74253726)
