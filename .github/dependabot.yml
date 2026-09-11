@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "direct"
+      # Include the coupled transitive dependencies of hatch.
+      - dependency-name: "httpx2"
+        dependency-type: "indirect"
+      - dependency-name: "httpcore2"
+        dependency-type: "indirect"
+    groups:
+      httpx-stack:
+        applies-to: "version-updates"
+        # httpx2 pins httpcore2 to the same release version.
+        patterns:
+          - "httpx2"
+          - "httpcore2"
