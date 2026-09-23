@@ -4,6 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    rebase-strategy: disabled
     allow:
       - dependency-type: "direct"
       # Include the coupled transitive dependencies of hatch.
