@@ -64,9 +64,8 @@ with open(output_path, "w", encoding="utf-8") as f:
             cwd=script_dir,
             stdin=subprocess.DEVNULL,
             stdout=f,
-            # 正常に処理が行われれば標準エラー出力が f に書き込まれることはないが
-            # エラーが発生した場合は書き込まれるかもしれないことに注意
-            stderr=subprocess.STDOUT,
+            # 警告やエラーは、生成するソースコードに混ぜず、親プロセスの標準エラー出力に流す。
+            stderr=None,
             check=True,
         )
 
