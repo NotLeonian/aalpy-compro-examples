@@ -1,4 +1,4 @@
-name: Python checks
+name: CI
 on:
   pull_request:
   push:
@@ -8,6 +8,7 @@ permissions:
   contents: read
 jobs:
   python-checks:
+    name: Python checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
