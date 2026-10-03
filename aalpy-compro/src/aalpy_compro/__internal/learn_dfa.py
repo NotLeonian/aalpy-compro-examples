@@ -148,22 +148,39 @@ def learn_dfa(
     learn_config: LearnConfigSpec,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
+    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
+    alphabet_list = list(alphabet_tuple)
+    sul = PrefixAcceptingSUL(accepts)
+    eq_oracle = build_eq_oracle(
+        alphabet_tuple,
+        sul,
+        oracle_spec,
+        fixed_eq_word_factory=fixed_eq_word_factory,
+    )
+
     if isinstance(learn_config, LStarLearnConfig):
-        return learn_dfa_Lstar(
-            alphabet=alphabet,
-            accepts=accepts,
-            oracle_spec=oracle_spec,
+        dfa = run_Lstar_compat(
+            alphabet_list=alphabet_list,
+            sul=sul,
+            eq_oracle=eq_oracle,
             learn_config=learn_config,
-            fixed_eq_word_factory=fixed_eq_word_factory,
         )
     else:  # isinstance(learn_config, KVLearnConfig)
-        return learn_dfa_KV(
-            alphabet=alphabet,
-            accepts=accepts,
-            oracle_spec=oracle_spec,
-            learn_config=learn_config,
-            fixed_eq_word_factory=fixed_eq_word_factory,
+        dfa = run_KV(
+            alphabet_list,
+            sul,
+            eq_oracle,
+            automaton_type="dfa",
+            cex_processing=learn_config.cex_processing,
+            max_learning_rounds=learn_config.max_learning_rounds,
+            cache_and_non_det_check=learn_config.cache_and_non_det_check,
+            return_data=False,
+            print_level=learn_config.print_level,
         )
+
+    assert isinstance(dfa, Dfa)
+    check_wp_constraint(dfa, oracle_spec)
+    return dfa
 
 
 def run_Lstar_compat(
@@ -205,25 +222,13 @@ def learn_dfa_Lstar(
     learn_config: LStarLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
-    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
-
-    sul = PrefixAcceptingSUL(accepts)
-    eq_oracle = build_eq_oracle(
-        alphabet_tuple,
-        sul,
-        oracle_spec,
+    return learn_dfa(
+        alphabet=alphabet,
+        accepts=accepts,
+        oracle_spec=oracle_spec,
+        learn_config=learn_config,
         fixed_eq_word_factory=fixed_eq_word_factory,
     )
-
-    dfa = run_Lstar_compat(
-        alphabet_list=list(alphabet_tuple),
-        sul=sul,
-        eq_oracle=eq_oracle,
-        learn_config=learn_config,
-    )
-
-    check_wp_constraint(dfa, oracle_spec)
-    return dfa
 
 
 def learn_dfa_KV(
@@ -234,29 +239,10 @@ def learn_dfa_KV(
     learn_config: KVLearnConfig,
     fixed_eq_word_factory: WordFactory[T] | None = None,
 ) -> Dfa[T]:
-    alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
-
-    sul = PrefixAcceptingSUL(accepts)
-    eq_oracle = build_eq_oracle(
-        alphabet_tuple,
-        sul,
-        oracle_spec,
+    return learn_dfa(
+        alphabet=alphabet,
+        accepts=accepts,
+        oracle_spec=oracle_spec,
+        learn_config=learn_config,
         fixed_eq_word_factory=fixed_eq_word_factory,
     )
-
-    dfa = run_KV(
-        list(alphabet_tuple),
-        sul,
-        eq_oracle,
-        automaton_type="dfa",
-        cex_processing=learn_config.cex_processing,
-        max_learning_rounds=learn_config.max_learning_rounds,
-        cache_and_non_det_check=learn_config.cache_and_non_det_check,
-        return_data=False,
-        print_level=learn_config.print_level,
-    )
-
-    assert isinstance(dfa, Dfa)
-    check_wp_constraint(dfa, oracle_spec)
-
-    return dfa

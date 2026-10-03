@@ -1,9 +1,10 @@
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass
-from importlib.util import module_from_spec, spec_from_file_location
+from types import ModuleType
 from typing import Generic, TypeAlias, TypeVar, cast
 
 from .normalize_alphabet import normalize_alphabet, require_hashable
+from .property_module import load_property_module
 
 T = TypeVar("T", bound=Hashable)
 
@@ -44,11 +45,11 @@ def iter_words(
 
 
 def load_word_factory(
-    mod: T,
+    mod: ModuleType,
     *,
     words_attr: str,
     iter_words_attr: str,
-) -> WordFactory[T] | None:
+) -> WordFactory[Hashable] | None:
     has_words = hasattr(mod, words_attr)
     has_iter_words = hasattr(mod, iter_words_attr)
 
@@ -70,9 +71,9 @@ def load_word_factory(
             )
 
         def factory_with_words(
-            raw_words: Iterable[Iterable[T]] = raw,
+            raw_words: Iterable[Iterable[Hashable]] = raw,
             attr_name: str = words_attr,
-        ) -> Iterable[tuple[T, ...]]:
+        ) -> Iterable[tuple[Hashable, ...]]:
             return iter_words(raw_words, attr_name=attr_name)
 
         return factory_with_words
@@ -82,9 +83,9 @@ def load_word_factory(
         if not callable(fn):
             raise ValueError(f"`{iter_words_attr}` must be callable.")
 
-        iter_words_fn = cast(Callable[[], Iterable[Iterable[T]]], fn)
+        iter_words_fn = cast(Callable[[], Iterable[Iterable[Hashable]]], fn)
 
-        def factory_with_iter_words() -> Iterable[tuple[T, ...]]:
+        def factory_with_iter_words() -> Iterable[tuple[Hashable, ...]]:
             produced = iter_words_fn()
             if not isinstance(produced, Iterable) or isinstance(produced, (str, bytes)):
                 raise TypeError(
@@ -141,17 +142,11 @@ def load_learning_property(path: str) -> LearningProperty[Hashable]:
       - 大きい word 集合は `iter_eq_words` を使う。
     """
 
-    spec = spec_from_file_location("learning_property", path)
-    if spec is None or spec.loader is None:
-        raise ValueError(f"Cannot load property from {path}.")
-
-    mod = module_from_spec(spec)
-    spec.loader.exec_module(mod)
-
-    if not hasattr(mod, "alphabet"):
-        raise ValueError(f"`alphabet` must be defined in {path}.")
-    if not hasattr(mod, "accepts"):
-        raise ValueError(f"`accepts` must be defined in {path}.")
+    mod = load_property_module(
+        path,
+        module_name="learning_property",
+        required_attributes=("alphabet", "accepts"),
+    )
 
     raw_alphabet = mod.alphabet
     raw_accepts = mod.accepts
@@ -178,6 +173,3 @@ def load_learning_property(path: str) -> LearningProperty[Hashable]:
         symbol_to_label=symbol_to_label,
         fixed_eq_word_factory=fixed_eq_word_factory,
     )
-
-
-CustomEqOracleFactoryAttrs: list[str] = ["fixed_eq_word_factory"]
