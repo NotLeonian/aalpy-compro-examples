@@ -2,12 +2,23 @@ import re
 from dataclasses import dataclass
 from typing import Literal, TypeAlias
 
-from .eq_oracles import EqOracleLiteral
+from .eq_oracles import (
+    EqOracleLiteral,
+    EqOracleSpec,
+    RandomWpSpec,
+    StatePrefixSpec,
+    WpSpec,
+)
 from .fullmatch import validate_fullmatch_pattern
 from .learn_dfa import (
     CliCexProcessingLiteral,
+    KVLearnConfig,
     LearnAlgorithmLiteral,
+    LearnConfigSpec,
     LStarClosingStrategyLiteral,
+    LStarLearnConfig,
+    normalize_kv_cex_processing,
+    normalize_lstar_cex_processing,
 )
 from .re_pattern import KEY_PATTERN, NAMESPACE_PATTERN
 
@@ -98,3 +109,56 @@ class MainArgs:
             or self.max_tests is not None
             or self.depth_first is not True
         )
+
+    def build_oracle_spec(self) -> EqOracleSpec | None:
+        if self.oracle is None:
+            return None
+        elif self.oracle == "wp":
+            if self.max_states is None:
+                raise SystemExit("--oracle wp requires --max-states.")
+            return WpSpec(max_states=self.max_states)
+        elif self.oracle == "random_wp":
+            return RandomWpSpec(
+                min_length=self.min_length,
+                expected_length=self.expected_length,
+                num_tests=self.num_tests,
+            )
+        else:  # self.oracle == "state_prefix"
+            return StatePrefixSpec(
+                walks_per_state=self.walks_per_state,
+                walk_len=self.walk_len,
+                max_tests=self.max_tests,
+                depth_first=self.depth_first,
+            )
+
+    def build_learn_config(self) -> LearnConfigSpec:
+        if self.algorithm == "lstar":
+            return LStarLearnConfig(
+                cex_processing=normalize_lstar_cex_processing(self.cex_processing),
+                closing_strategy=self.closing_strategy,
+                e_set_suffix_closed=self.e_set_suffix_closed,
+                all_prefixes_in_obs_table=self.all_prefixes_in_obs_table,
+                max_learning_rounds=self.max_rounds,
+                cache_and_non_det_check=(not self.no_cache),
+                print_level=self.print_level,
+            )
+        else:
+            if self.closing_strategy != "shortest_first":
+                raise SystemExit(
+                    "--closing-strategy is only valid with --algorithm lstar."
+                )
+            if self.e_set_suffix_closed:
+                raise SystemExit(
+                    "--e-set-suffix-closed is only valid with --algorithm lstar."
+                )
+            if not self.all_prefixes_in_obs_table:
+                raise SystemExit(
+                    "--no-all-prefixes-in-obs-table is only valid with --algorithm lstar."
+                )
+
+            return KVLearnConfig(
+                cex_processing=normalize_kv_cex_processing(self.cex_processing),
+                max_learning_rounds=self.max_rounds,
+                cache_and_non_det_check=(not self.no_cache),
+                print_level=self.print_level,
+            )

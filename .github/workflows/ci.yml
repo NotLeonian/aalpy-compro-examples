@@ -24,6 +24,8 @@ jobs:
         run: uv run --locked ruff format --check .
       - name: Ruff lint
         run: uv run --locked ruff check .
+      - name: Unit tests
+        run: uv run --locked python -m unittest discover -s aalpy-compro/tests
       - name: Pyright
         run: uv run --locked pyright
       - name: Mypy (library)

@@ -1,10 +1,10 @@
 from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass
-from importlib.util import module_from_spec, spec_from_file_location
 from typing import Generic, TypeVar, cast
 
 from ..regex import ComplementRegex, Regex
 from .normalize_alphabet import normalize_alphabet
+from .property_module import load_property_module
 
 T = TypeVar("T", bound=Hashable)
 
@@ -26,17 +26,11 @@ def load_regex_property(path: str) -> RegexProperty[Hashable]:
       - symbol_to_label: Callable[[T], str]
     """
 
-    spec = spec_from_file_location("regex_property", path)
-    if spec is None or spec.loader is None:
-        raise ValueError(f"Cannot load property from {path}.")
-
-    mod = module_from_spec(spec)
-    spec.loader.exec_module(mod)
-
-    if not hasattr(mod, "alphabet"):
-        raise ValueError(f"`alphabet` must be defined in {path}.")
-    if not hasattr(mod, "regex"):
-        raise ValueError(f"`regex` must be defined in {path}.")
+    mod = load_property_module(
+        path,
+        module_name="regex_property",
+        required_attributes=("alphabet", "regex"),
+    )
 
     raw_alphabet = mod.alphabet
     regex = mod.regex
