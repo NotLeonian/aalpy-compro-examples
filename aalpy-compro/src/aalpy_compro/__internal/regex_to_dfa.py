@@ -6,6 +6,7 @@ from typing import Generic, TypeVar
 from aalpy.automata import Dfa
 
 from ..regex import ComplementRegex, Regex
+from .minimize_dfa import minimize_complete_dfa
 from .missing_symbol_payload import MissingSymbolPayload
 from .validation_for_aalpy import validate_aalpy_alphabet
 
@@ -158,71 +159,71 @@ def regex_to_nfa(
     )
 
 
-def epsilon_closure(
-    nfa: Nfa[T],
-    states: frozenset[int],
-    *,
-    cache: dict[frozenset[int], frozenset[int]],
-) -> frozenset[int]:
-    cached = cache.get(states)
-    if cached is not None:
-        return cached
-
-    closure = set(states)
-    stack = deque(states)
-
-    while stack:
-        state = stack.pop()
-        for next_state in nfa.epsilon_transitions.get(state, ()):
-            if next_state in closure:
-                continue
-            closure.add(next_state)
-            stack.append(next_state)
-
-    frozen = frozenset(closure)
-    cache[states] = frozen
-    return frozen
-
-
-def move(nfa: Nfa[T], states: frozenset[int], symbol: T) -> frozenset[int]:
-    reached: set[int] = set()
-    for state in states:
-        reached.update(nfa.symbol_transitions.get(state, {}).get(symbol, ()))
-    return frozenset(reached)
-
-
 def determinize_complete_state_setup(
     nfa: Nfa[T],
     *,
     alphabet: tuple[T, ...],
 ) -> dict[str, tuple[bool, dict[T, str]]]:
-    closure_cache: dict[frozenset[int], frozenset[int]] = {}
-
-    start_subset = epsilon_closure(
-        nfa,
-        frozenset({nfa.start_state}),
-        cache=closure_cache,
+    # Only these states can consume input or decide acceptance after epsilon closure.
+    active_states = nfa.accepting_states.union(
+        state for state, transitions in nfa.symbol_transitions.items() if transitions
     )
+    closure_cache: dict[frozenset[int], frozenset[int]] = {}
+    alphabet_set = set(alphabet)
 
+    def epsilon_closure(seeds: frozenset[int]) -> frozenset[int]:
+        cached = closure_cache.get(seeds)
+        if cached is not None:
+            return cached
+
+        visited = set(seeds)
+        stack = list(seeds)
+        reached: set[int] = set()
+        while stack:
+            state = stack.pop()
+            if state in active_states:
+                reached.add(state)
+            for target in nfa.epsilon_transitions.get(state, ()):
+                if target not in visited:
+                    visited.add(target)
+                    stack.append(target)
+
+        result = frozenset(reached)
+        closure_cache[seeds] = result
+        return result
+
+    start_subset = epsilon_closure(frozenset({nfa.start_state}))
     subset_to_name: dict[frozenset[int], str] = {start_subset: "q0"}
-    queue: deque[frozenset[int]] = deque([start_subset])
+    queue = deque([start_subset])
     state_setup: dict[str, tuple[bool, dict[T, str]]] = {}
 
     while queue:
         subset = queue.popleft()
-        state_name = subset_to_name[subset]
+        targets: dict[T, set[int]] = {}
+        # Sparse transitions avoid revisiting every state for every alphabet symbol.
+        for state in subset:
+            for symbol, destinations in nfa.symbol_transitions.get(state, {}).items():
+                if symbol not in alphabet_set:
+                    continue
+                reached = targets.get(symbol)
+                if reached is None:
+                    targets[symbol] = set(destinations)
+                else:
+                    reached.update(destinations)
+
         transitions: dict[T, str] = {}
-
         for symbol in alphabet:
-            moved = move(nfa, subset, symbol)
-            target_subset = epsilon_closure(nfa, moved, cache=closure_cache)
-            if target_subset not in subset_to_name:
-                subset_to_name[target_subset] = f"q{len(subset_to_name)}"
+            # Close the combined targets once; overlapping closures can be large.
+            target_subset = epsilon_closure(frozenset(targets.get(symbol, ())))
+            target_name = subset_to_name.get(target_subset)
+            if target_name is None:
+                target_name = f"q{len(subset_to_name)}"
+                subset_to_name[target_subset] = target_name
                 queue.append(target_subset)
-            transitions[symbol] = subset_to_name[target_subset]
+            transitions[symbol] = target_name
 
-        state_setup[state_name] = (
-            any(state in nfa.accepting_states for state in subset),
+        state_setup[subset_to_name[subset]] = (
+            not nfa.accepting_states.isdisjoint(subset),
             transitions,
         )
 
@@ -234,7 +235,6 @@ def compile_plain_regex_to_dfa(
     regex: Regex[T],
     alphabet: tuple[T, ...],
 ) -> Dfa[T]:
-    regex.ensure_acyclic()
     used_symbols = regex.symbols()
     missing_symbols = used_symbols.difference(alphabet)
     if missing_symbols:
@@ -245,9 +245,7 @@ def compile_plain_regex_to_dfa(
 
     nfa = regex_to_nfa(regex=regex, alphabet=alphabet)
     state_setup = determinize_complete_state_setup(nfa, alphabet=alphabet)
-    dfa = Dfa.from_state_setup(state_setup)
-    dfa.minimize()
-    return dfa
+    return minimize_complete_dfa(state_setup, alphabet=alphabet)
 
 
 def complement_dfa(dfa: Dfa[T]) -> Dfa[T]:
@@ -264,7 +262,6 @@ def regex_to_dfa(
     alphabet_tuple, _ = validate_aalpy_alphabet(alphabet)
 
     if isinstance(regex, ComplementRegex):
-        regex.ensure_acyclic()
         dfa = compile_plain_regex_to_dfa(
             regex=regex.regex,
             alphabet=alphabet_tuple,
