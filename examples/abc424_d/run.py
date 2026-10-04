@@ -1,19 +1,17 @@
 #!/usr/bin/env -S uv run
 import subprocess
 import sys
-from collections.abc import Iterator, Mapping
-from contextlib import contextmanager
+from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 
-@contextmanager
 def render_to_temp_path(
     template_path: Path,
     context: Mapping[str, object],
     *,
-    filename: str = "generated.py",
-) -> Iterator[Path]:
+    output_path: Path,
+) -> None:
     """
     template_path のファイルに
     context の値を代入して
@@ -22,10 +20,7 @@ def render_to_temp_path(
 
     rendered = template_path.read_text(encoding="utf-8").format_map(context)
 
-    with TemporaryDirectory(prefix="aalpy-compro-tmpdir-") as tmpdir:
-        output_path = Path(tmpdir) / filename
-        output_path.write_text(rendered, encoding="utf-8", newline="\n")
-        yield output_path
+    output_path.write_text(rendered, encoding="utf-8", newline="\n")
 
 
 output_filename = "learned_dfa.cpp"
@@ -78,9 +73,11 @@ with open(output_path, "w", encoding="utf-8") as f:
 
         print(f"key: {key}", file=sys.stderr)
 
-        with render_to_temp_path(
-            template_path,
-            context,
-            filename=property_filename,
-        ) as property_path:
+        with TemporaryDirectory(prefix="aalpy-compro-tmpdir-") as tmpdir:
+            property_path = Path(tmpdir) / property_filename
+            render_to_temp_path(
+                template_path,
+                context,
+                output_path=property_path,
+            )
             write(learn_args(key=key, property_path=property_path))
