@@ -6,12 +6,8 @@ updates:
       interval: "weekly"
     rebase-strategy: disabled
     allow:
-      - dependency-type: "direct"
-      # Include the coupled transitive dependencies of hatch.
-      - dependency-name: "httpx2"
-        dependency-type: "indirect"
-      - dependency-name: "httpcore2"
-        dependency-type: "indirect"
+      # Allow updates for all direct and indirect dependencies.
+      - dependency-type: "all"
     groups:
       httpx-stack:
         applies-to: "version-updates"
