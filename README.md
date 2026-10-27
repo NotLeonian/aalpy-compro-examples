@@ -90,9 +90,16 @@ aalpy-compro では、語を表現するために各文字のリストなどで�
 Python ソースコードのフォーマットと静的検査には以下のコマンドを使用できます。
 
 ```sh
-uv run ruff format .
-uv run ruff check .
-uv run pyright
-uv run mypy ./aalpy-compro
+uv run ruff format . .github/scripts/check_uv_lock_revision.py
+uv run ruff check . .github/scripts/check_uv_lock_revision.py
+uv run pyright . .github/scripts/check_uv_lock_revision.py
+uv run mypy ./aalpy-compro .github/scripts/check_uv_lock_revision.py
 find examples -mindepth 1 -maxdepth 1 -type d -exec sh -c 'for dir in "$@"; do python_source=$(find "$dir" -type f -name "*.py" -print -quit) || exit; [ -n "$python_source" ] || continue; printf "%s\n" "$dir"; uv run mypy "$dir" || exit; done' sh {} +
 ```
+
+### uv.lock の更新方針
+
+`uv.lock` のリビジョン番号は、バージョン番号が上がる場合を除いて下げないでください。
+バージョン番号も下げないようにしてください。
+
+この方針に反する変更の場合、CI は失敗となります。
