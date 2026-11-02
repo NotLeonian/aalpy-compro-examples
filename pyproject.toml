@@ -19,6 +19,7 @@ dev = [
 
 [tool.mypy]
 exclude = ["ac-library"]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/aalpy-compro/typings"
 python_version = "3.11"
 
 [tool.pyright]
@@ -52,10 +53,3 @@ members = [
 
 [tool.uv.sources]
 aalpy-compro = { workspace = true }
-
-[[tool.mypy.overrides]]
-module = [
-    "aalpy.*",
-    "pydot.*",
-]
-ignore_missing_imports = true

@@ -130,8 +130,8 @@ def aalpy_dfa_to_cpp(
     ):
         sink = n
         for row in trans_table:
-            for j, dst in enumerate(row):
-                if dst < 0:
+            for j, dst_index in enumerate(row):
+                if dst_index < 0:
                     row[j] = sink
         trans_table.append([sink] * sigma)
         n += 1
