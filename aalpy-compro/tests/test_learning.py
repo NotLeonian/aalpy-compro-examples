@@ -76,7 +76,7 @@ class LearningTests(unittest.TestCase):
         ]
         for config in configs:
             with self.subTest(config=config):
-                dfa = learn_dfa(
+                dfa: Dfa[int] = learn_dfa(
                     alphabet=(0, 1),
                     accepts=accepts,
                     oracle_spec=WpSpec(max_states=2),
@@ -123,7 +123,7 @@ class LearningTests(unittest.TestCase):
                 )
 
     def test_wp_constraint_is_checked_after_learning(self) -> None:
-        states = [DfaState("0"), DfaState("1"), DfaState("2")]
+        states: list[DfaState[int]] = [DfaState("0"), DfaState("1"), DfaState("2")]
         oversized_dfa = Dfa(states[0], states)
         for learner, config in self.entry_points():
             algorithm = (
