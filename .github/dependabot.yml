@@ -5,13 +5,29 @@ updates:
     schedule:
       interval: "weekly"
     rebase-strategy: disabled
+    # Allow updates for all direct and indirect dependencies.
     allow:
-      # Allow updates for all direct and indirect dependencies.
       - dependency-type: "all"
+    # Keep clang-format, clang-tidy, and clangd on major version 20.
+    ignore:
+      - dependency-name: "clang-format"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "clang-tidy"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "clangd"
+        update-types: ["version-update:semver-major"]
     groups:
+      # Group Clang tools and clangd-tidy version updates into a single pull request.
+      clang-tools:
+        applies-to: "version-updates"
+        patterns:
+          - "clang-format"
+          - "clang-tidy"
+          - "clangd"
+          - "clangd-tidy"
+      # httpx2 pins httpcore2 to the same release version.
       httpx-stack:
         applies-to: "version-updates"
-        # httpx2 pins httpcore2 to the same release version.
         patterns:
           - "httpx2"
           - "httpcore2"
@@ -21,8 +37,8 @@ updates:
       interval: weekly
     rebase-strategy: disabled
     groups:
+      # Group official GitHub Actions updates into a single pull request.
       actions:
         applies-to: version-updates
-        # Group official GitHub Actions updates into a single pull request.
         patterns:
           - "actions/*"
