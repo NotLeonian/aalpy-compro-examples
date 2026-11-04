@@ -15,14 +15,14 @@ members = [
 
 [[package]]
 name = "aalpy"
-version = "1.6.2"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydot" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/81/68/969ae10576a802ba3339295ed56d080961814782468b7a4cf598163bcce0/aalpy-1.6.2.tar.gz", hash = "sha256:67bc36a988cf35e16d95927f2a824ef27d4bd067ba85acd083c0dc2cc732da02", size = 153551, upload-time = "2026-08-03T13:24:10.541Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d2/91/21694c92ab6b8085242ccc4d099e2ecd3dee26c38269f3bacacea0e6f662/aalpy-2.0.0.tar.gz", hash = "sha256:a00708fb86ce2d490d298ad514c3722b0435b3249a9d0f3b556211180937b8d5", size = 204229, upload-time = "2026-10-25T17:30:51.197Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/41/b6227b467bb8e9e3420245d4d14885182af4ae6f64980dc02253a22c4f0c/aalpy-1.6.2-py3-none-any.whl", hash = "sha256:da2034eab661506f634c5c69dd793527b658daf6fb5fead4e2c9498bd464f6ec", size = 190153, upload-time = "2026-08-03T13:24:09.01Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/3a/2dfa24db513638add8519554b3722e5acec904060ad22f71aa694c096085/aalpy-2.0.0-py3-none-any.whl", hash = "sha256:1300a55c430948ab0f2f1a31945cdc50d5bbbc1cef6dbd44b981ebe0f6416557", size = 256620, upload-time = "2026-10-25T17:30:49.737Z" },
 ]
 
 [[package]]
