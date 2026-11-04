@@ -103,3 +103,28 @@ find examples -mindepth 1 -maxdepth 1 -type d -exec sh -c 'for dir in "$@"; do p
 バージョン番号も下げないようにしてください。
 
 この方針に反する変更の場合、CI は失敗となります。
+
+### C++ の開発ツール
+
+次のコマンドで、clang-format, clang-tidy, clangd, clangd-tidy をインストールできます。
+
+```sh
+uv sync --locked --group dev
+```
+
+clang-format, clang-tidy, clangd のメジャーバージョンは 20 に統一します。
+clangd-tidy は独自にバージョンが付けられています。
+各ツールのバージョンは [pyproject.toml](pyproject.toml) と [uv.lock](uv.lock) で管理します。
+C++ のコンパイラと標準ライブラリは別途用意してください。
+
+clang-tidy と clangd-tidy は、対象のファイルを指定して実行できます。
+[compile_flags.txt](compile_flags.txt) に記載した C++17 などのオプションを使用します。
+
+```sh
+uv run --locked clang-tidy examples/tdpc_grid/refined_solution.cpp
+uv run --locked clangd-tidy examples/tdpc_grid/refined_solution.cpp
+```
+
+clangd-tidy は clangd を使って診断を取得します。
+clang-tidy の一部の検査と `--fix` には対応していないため、対応していない検査や自動修正には clang-tidy を使用してください。
+エディタでも uv が管理する clangd を使うように設定すると、同じバージョンで診断を確認できます。
