@@ -59,7 +59,7 @@ dev = [
 
 [[package]]
 name = "aalpy-compro-examples"
-version = "0.6.5"
+version = "0.7.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aalpy-compro" },
