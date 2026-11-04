@@ -118,7 +118,7 @@ clangd-tidy は独自にバージョンが付けられています。
 C++ のコンパイラと標準ライブラリは別途用意してください。
 
 clang-tidy と clangd-tidy は、対象のファイルを指定して実行できます。
-[compile_flags.txt](compile_flags.txt) に記載した C++20 などのオプションを使用します。
+[compile_flags.txt](compile_flags.txt) に記載した C++17 などのオプションを使用します。
 
 ```sh
 uv run --locked clang-tidy examples/tdpc_grid/refined_solution.cpp
